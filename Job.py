@@ -16,8 +16,20 @@ class Job:
         yield self.env.timeout(self.expectedTime)
         print("job finished at: %d" % self.env.now)
     
-    def run(self):
+    def run(self,nodes):
         print("run invoked")
+        
+        #req accses to ressource nodes
+
+        #modifie nodes to use
+
+        #release nodes
         self.env.process( self.createProcess() )
+
+        #req accses to serrource nodes
+
+        #modify to idle
+
+        #release nodes
 
     

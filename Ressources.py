@@ -7,10 +7,15 @@ class Node:
     def __init__(self,x):
         print("resource created")
         Node.speed = x
+    def use(self):
+        self.inUse = True
+    def release(self):
+        self.inUse = False
 
-class Nodes:
+class RessourceManager:
     
-    def __init__(self,nodeSpeed):
+    def __init__(self,env,nodeSpeed):
+        
         self.nodes = []
         #map
         for x in nodeSpeed:

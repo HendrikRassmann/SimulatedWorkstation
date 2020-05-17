@@ -12,7 +12,7 @@ print("Starting env")
 
 env = simpy.Environment()
 
-res = Ressources.Nodes([1,1,1,1,1])
+res = Ressources.RessourceManager([1,1,1,1,1])
 
 scheduler = Scheduler.Scheduler(env,res)
 
