@@ -24,7 +24,7 @@ class Job:
         #modifie nodes to use
 
         #release nodes
-        self.env.process( self.createProcess() )
+        return  self.createProcess()
 
         #req accses to serrource nodes
 
