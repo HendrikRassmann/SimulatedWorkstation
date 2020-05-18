@@ -49,6 +49,6 @@ plt.ylabel('expected Time in s\n nr of nodes used')
 plt.subplot(2,1,2)
 plt.plot( ids,timeInQ,'.-')
 plt.ylabel('time waiting in Q')
-
+plt.savefig('graphs.png')
 plt.show()
 #matplotlib stuff
