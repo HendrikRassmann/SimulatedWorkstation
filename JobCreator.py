@@ -1,7 +1,7 @@
 print("importing JobCreator.py")
 import simpy
 import Job
-
+import random
 
 class JobCreator:
 
@@ -15,6 +15,6 @@ class JobCreator:
         while True:
             yield self.env.timeout(self.timeBetween)
             #print("new job")
-            newJob = Job.Job(self.jobID,7,2)
+            newJob = Job.Job(self.jobID,random.randint(1,10),random.randint(1,4))
             self.scheduler.addJob(newJob)
             self.jobID += 1
