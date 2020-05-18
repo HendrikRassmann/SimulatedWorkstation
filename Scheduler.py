@@ -46,9 +46,6 @@ class Scheduler:
         print("Job %d finished at: %d" % (job.id,self.env.now))
     
 
-
-
-
     def runScheduler(self):
         while True:
             yield self.env.timeout(1)        

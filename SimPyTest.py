@@ -41,8 +41,10 @@ nrOfNodes = list (map (lambda x : x.nrRessources, jobs))
 
 plt.subplot(2,1,1)
 plt.plot( ids,expectedTimes,'o-' )
-plt.plot( ids,nrOfNodes,label="nr of nodes")
 plt.ylabel('expectedTimes of Job')
+plt.plot( ids,nrOfNodes,label="nr of nodes")
+plt.ylabel('expected Time in s\n nr of nodes used')
+
 
 plt.subplot(2,1,2)
 plt.plot( ids,timeInQ,'.-')
