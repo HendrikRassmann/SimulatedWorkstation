@@ -4,14 +4,6 @@ import functools
 from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
 print("starting")
 
-#####################
-#helpers
-T = TypeVar('T')
-
-
-
-#####################
-
 class Node:
 	def __init__(self, ID: int, speed: int=1)-> None:
 		self.id = ID
