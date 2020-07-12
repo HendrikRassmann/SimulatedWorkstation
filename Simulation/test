@@ -1,0 +1,12 @@
+echo "Type Checking:"
+
+mypy Simulation.py
+mypy Analysis.py
+mypy Main.py
+mypy Generator.py
+
+echo "Testing:"
+
+python3 -m pytest
+
+echo "all Tests finished"

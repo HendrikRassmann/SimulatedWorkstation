@@ -4,6 +4,7 @@ import functools
 from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
 print("starting")
 
+
 class Node:
 	def __init__(self, ID: int, speed: int=1)-> None:
 		self.id = ID
@@ -22,7 +23,7 @@ class Job:
 		self.runningOn: List[Node] = []
 		
 	def __str__(self):  # type: () -> str
-		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d, startRunning: %d, endRunning: %d" % (self.id, self.enterQ,self.runtime, self.nodes2run, self.startRunning, self.endRunning)
+		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d" % (self.id, self.enterQ,self.runtime, self.nodes2run)
 
 def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int) -> Optional[Tuple[Job, List[Node]] ]:
 
