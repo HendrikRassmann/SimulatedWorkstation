@@ -1,6 +1,7 @@
 #Testing TypeSistem FiFo :D
 
 import functools
+import random
 from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
 print("starting")
 
@@ -9,7 +10,7 @@ class Node:
 	def __init__(self, ID: int, speed: int=1)-> None:
 		self.id = ID
 		self.speed = speed
-	def __str__(self):  # type: () -> str
+	def __repr__(self):  # type: () -> str
 		return "id: %d" % self.id
 		
 class Job:
@@ -111,6 +112,26 @@ def firstFit(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=N
 		return fifo(runnableJobs, nodes)
 			
 	return None
+#plz Test
+def lpt(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
+	#nodes will be selected randomly
+	if not q or not nodes: return None
+
+	nextJob: Job = (max(q,key=lambda x: x.runtime))
+	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+
+def spt(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
+	#nodes will be selected randomly
+	if not q or not nodes: return None
+	
+	nextJob: Job = (min(q,key=lambda x: x.runtime))
+	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+
+def rand(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
+	if not q or not nodes: return None
+	nextJob: Job = random.choice(q)
+	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+	
 class System:
 	def __init__(self,jobs: List[Job], nodesAvl: int, scheduler:\
 	Callable[ [List[Job], List[Node], List[Job],int ], Optional[Tuple[Job, List[Node]]]  ] ) -> None:

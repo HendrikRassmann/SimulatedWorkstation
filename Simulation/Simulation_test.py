@@ -5,6 +5,7 @@
 from hypothesis import given, settings, note, strategies as st
 from hypothesis.strategies import builds
 import Simulation
+import Analysis
 from Simulation import Job
 #int: id, enterQ, runtime, nodes
 
@@ -22,8 +23,22 @@ generate_enterQ,\
 generate_runtime,\
 generate_nodes2run)
 
+generate_id_small = st.integers(0,0)
+generate_enterQ_small = st.integers(0,50)
+generate_runtime_small = st.integers(1,50)
+generate_nodes2run_small = st.integers(1,5)
+
 
 generate_list_jobs = st.lists(generate_job, min_size=0, max_size=50)
+
+generate_job_small = builds(\
+Simulation.Job,\
+generate_id_small,\
+generate_enterQ_small,\
+generate_runtime_small,\
+generate_nodes2run_small)
+
+generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5)
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
 
@@ -33,6 +48,7 @@ generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )
 
 #@given
 def test_list_diff():
+	#assert False
 	pass
 
 def test_fifo_unit():
@@ -89,7 +105,6 @@ def test_firstFit(q,nodes):
 	assert True
 	
 
-#@given(st.integers)
 @given(generate_list_jobs, generate_list_nodes)
 def test_fifo(q,nodes):
 	pair = Simulation.fifo(q, nodes)
@@ -97,39 +112,25 @@ def test_fifo(q,nodes):
 		assert len(pair[1]) >=1
 		assert pair[0].nodes2run <= len(pair[1])
 
-
-'''
-This should hold for any 2 scheduling strategies
-
-@given(generate_list_jobs, generate_nodes)
-@settings(max_examples=100)
-def test_firstFitEQfifoL1(q,n):
-	if (len(q) > 0):
-		firstElem = q[:1]
-		assert Simulation.fifo(firstElem,n) == Simulation.firstFit(firstElem,n)
-'''
-
 @given(generate_list_jobs)
 def test_ffEQfifo_allRunnable(q):
 	nodes1k = list(map(Simulation.Node, list(range(50)) ) )#should be max nodes needed
 	assert Simulation.fifo(q, nodes1k) == Simulation.firstFit(q, nodes1k)
 	#doesnt have to be, you know, there might be many right answers
 
+@settings(max_examples=1000)
+@given(generate_list_jobs_small)
+def test_whenFiFoFirstFitFlowTime(q):
+	sysFiFo: Simulation.System = Simulation.System(q.copy(),5,Simulation.fifo)
+	sysFirstFit: Simulation.System = Simulation.System(q.copy(),5,Simulation.firstFit)
+	
+	flowTimeFifo =  Analysis.flowTime(sysFiFo.run())
+	flowTimeFirstFit = Analysis.flowTime(sysFirstFit.run())
+	print(len(q))
+	print(*q,sep = "\n")
+	print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
+	assert flowTimeFifo <= flowTimeFirstFit 
 
-#generate List of jobs
-#sort by enterQ
-#ids: random
-#enterQ +y
-#runntime = generate
-#nodes ? generate 
-
-
-#test fifo
-
-#print ("hello, my name is")
-#generate_job.example()
-
-#Jobs generator
 @given(st.integers(0,1000), st.integers(0,1000), st.integers(0,1000), st.integers(1,100) )
 def test_test(ids,enterQ,runtime,nodes):
 	j = Simulation.Job(ids,enterQ,runtime,nodes)
