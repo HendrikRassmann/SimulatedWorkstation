@@ -10,7 +10,7 @@ class Node:
 	def __init__(self, ID: int, speed: int=1)-> None:
 		self.id = ID
 		self.speed = speed
-	def __repr__(self):  # type: () -> str
+	def __str__(self):  # type: () -> str
 		return "id: %d" % self.id
 		
 class Job:
@@ -18,13 +18,14 @@ class Job:
 		self.id = id
 		self.enterQ = enterQ
 		self.runtime = runtime
-		self.startRunning: Optional[int] = None
-		self.endRunning: Optional[int] = None
+		self.startRunning: Optional[int] = -1
+		self.endRunning: Optional[int] = -1
 		self.nodes2run = nodes2run
 		self.runningOn: List[Node] = []
 		
+	#print star,end,running on, also
 	def __str__(self):  # type: () -> str
-		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d" % (self.id, self.enterQ,self.runtime, self.nodes2run)
+		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d, startRunning: %d, endRunning: %d\n" % (self.id, self.enterQ,self.runtime, self.nodes2run, self.startRunning, self.endRunning)
 
 def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int) -> Optional[Tuple[Job, List[Node]] ]:
 

@@ -38,7 +38,8 @@ generate_enterQ_small,\
 generate_runtime_small,\
 generate_nodes2run_small)
 
-generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5)
+#st.lists(twoints, unique_by=(lambda x: x[0], lambda x: x[1]))
+generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.enterQ) )
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
 
@@ -121,14 +122,21 @@ def test_ffEQfifo_allRunnable(q):
 @settings(max_examples=1000)
 @given(generate_list_jobs_small)
 def test_whenFiFoFirstFitFlowTime(q):
+
 	sysFiFo: Simulation.System = Simulation.System(q.copy(),5,Simulation.fifo)
 	sysFirstFit: Simulation.System = Simulation.System(q.copy(),5,Simulation.firstFit)
 	
-	flowTimeFifo =  Analysis.flowTime(sysFiFo.run())
-	flowTimeFirstFit = Analysis.flowTime(sysFirstFit.run())
-	print(len(q))
-	print(*q,sep = "\n")
-	print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
+	fifoRun = sysFiFo.run()
+	flowTimeFifo =  Analysis.flowTime(fifoRun)
+	firstFitRun = sysFirstFit.run()
+	flowTimeFirstFit = Analysis.flowTime(firstFitRun)
+	note("".join(map(str,firstFitRun)))
+	note("".join(map(str,q)) )
+	note("#OfNodes: "+str(5) )
+	
+	#print(len(q))
+	#print(*q,sep = "\n")
+	#print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
 	assert flowTimeFifo <= flowTimeFirstFit 
 
 @given(st.integers(0,1000), st.integers(0,1000), st.integers(0,1000), st.integers(1,100) )
