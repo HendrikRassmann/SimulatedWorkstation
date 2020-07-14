@@ -9,10 +9,10 @@ import Analysis
 from Simulation import Job
 #int: id, enterQ, runtime, nodes
 
-generate_id = st.integers(0,1000)
-generate_enterQ = st.integers(0,1000)
-generate_runtime = st.integers(1,1000)
-generate_nodes2run = st.integers(1,50)
+generate_id = st.integers(0,100)
+generate_enterQ = st.integers(0,100)
+generate_runtime = st.integers(1,100)
+generate_nodes2run = st.integers(1,20)
 
 generate_node = builds(Simulation.Node, st.integers(0,50))
 
@@ -24,8 +24,8 @@ generate_runtime,\
 generate_nodes2run)
 
 generate_id_small = st.integers(0,0)
-generate_enterQ_small = st.integers(0,50)
-generate_runtime_small = st.integers(1,50)
+generate_enterQ_small = st.integers(0,10)
+generate_runtime_small = st.integers(1,10)
 generate_nodes2run_small = st.integers(1,5)
 
 
@@ -43,14 +43,102 @@ generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, 
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
 
+#####################
+# Testing Schedulers#
+# ( ) backfilling
+# (X) fifo
+# (X) firstfit
+# (X) lpt
+# (X) spt
+# (X) rand
+#####################
 
-#no examples?
+@settings(max_examples=30001)
+@given(generate_list_jobs_small)#unique ids
+def test_backfilling(q):
+	#small list has id 0
+	sysFiFo: Simulation.System = Simulation.System(q.copy(),5,Simulation.fifo)
+	sysBackfilling: Simulation.System = Simulation.System(q.copy(),5,Simulation.backfilling)
+	
+	fifoTrace = sysFiFo.run()
+	backfillingTrace = sysBackfilling.run()
+	
+	fifoTraceStart = sorted(list(map(lambda j: j.startRunning, fifoTrace )))
+	backfillingTraceStart = sorted(list(map(lambda j: j.startRunning,backfillingTrace )))
+	
+	note("".join(map(str,q)) )
+	note("#OfNodes: "+str(5) )
+	
+	note("fifoTrace:")
+	note("".join(map(str,fifoTrace)))
+	note("backfillingTrace:")
+	note("".join(map(str,backfillingTrace)))
+	
+	for f,b in zip(fifoTraceStart, backfillingTraceStart):
+		assert b <= f
+	'''
+	#fifoRun = list(map(lambda j: j.startRunning, sysFiFo.run())).sort()#
+	print(len(fifoRun))
+	backfillingRun = list(map(lambda j: j.startRunning, sysBackfilling.run())).sort()
+	
+	print(len(fifoRun))
+	for f,b in zip(fifoRun,backfillingRun):#len 0?
+		assert b.enterQ <= f.enterQ'''
 
 
-#@given
-def test_list_diff():
-	#assert False
-	pass
+@given(generate_list_jobs, generate_list_nodes)
+def test_random(q,n):
+	nextJob = Simulation.rand(q,n)
+	if not (q and n): assert nextJob is None
+	else:
+		if nextJob is not None: 
+			assert nextJob[0] in q
+			for node in nextJob[1]: assert node in n
+		else:
+			assert max( map(lambda j: j.nodes2run,q)) > len(n)
+		#one not runnable job
+
+@given(generate_list_jobs, generate_list_nodes)
+def test_lpt(q,n):
+	# picks a job with the longest runtime
+	# found one -> no other job longer
+	# none	-> either no job runnable
+	#	-> or one of the longest not runnable
+	
+	nextJob = Simulation.lpt(q,n)
+
+	#q or nodes empty
+	if not (q and n):
+		assert nextJob is None
+	else:	
+		if nextJob is None: #only runs the longest job
+
+			maxPT = max( map(lambda j: j.runtime,q) ) #max runtime in q			
+			nodesAvl = len(n)
+			assert max(filter(lambda j: j.runtime == maxPT, q), key=lambda j: j.nodes2run).nodes2run > nodesAvl
+						
+		else:
+			for j in q: assert j.runtime <= nextJob[0].runtime
+
+#some cool shit with inverting runtimes maybe?
+@given(generate_list_jobs, generate_list_nodes)
+def test_spt(q,n):
+	nextJob = Simulation.spt(q,n)
+	note("".join(map(str,q)) )
+	note("number of nodesAvl: %d" %len(n))
+	#q or nodes empty
+	if not (q and n):
+		assert nextJob is None
+	else:	
+		if nextJob is None: #only runs the longest job
+
+			minPT = min( map(lambda j: j.runtime,q) ) #max runtime in q			
+			nodesAvl = len(n)
+			assert max(filter(lambda j: j.runtime == minPT, q), key=lambda j: j.nodes2run).nodes2run > nodesAvl#fails
+						
+		else:
+			for j in q: assert j.runtime >= nextJob[0].runtime
+
 
 def test_fifo_unit():
 	emptyJobList = []
@@ -119,7 +207,8 @@ def test_ffEQfifo_allRunnable(q):
 	assert Simulation.fifo(q, nodes1k) == Simulation.firstFit(q, nodes1k)
 	#doesnt have to be, you know, there might be many right answers
 
-@settings(max_examples=1000)
+'''
+@settings(max_examples=10000)
 @given(generate_list_jobs_small)
 def test_whenFiFoFirstFitFlowTime(q):
 
@@ -127,9 +216,9 @@ def test_whenFiFoFirstFitFlowTime(q):
 	sysFirstFit: Simulation.System = Simulation.System(q.copy(),5,Simulation.firstFit)
 	
 	fifoRun = sysFiFo.run()
-	flowTimeFifo =  Analysis.flowTime(fifoRun)
+	flowTimeFifo =  Analysis.makespan(fifoRun)
 	firstFitRun = sysFirstFit.run()
-	flowTimeFirstFit = Analysis.flowTime(firstFitRun)
+	flowTimeFirstFit = Analysis.makespan(firstFitRun)
 	note("".join(map(str,firstFitRun)))
 	note("".join(map(str,q)) )
 	note("#OfNodes: "+str(5) )
@@ -138,11 +227,4 @@ def test_whenFiFoFirstFitFlowTime(q):
 	#print(*q,sep = "\n")
 	#print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
 	assert flowTimeFifo <= flowTimeFirstFit 
-
-@given(st.integers(0,1000), st.integers(0,1000), st.integers(0,1000), st.integers(1,100) )
-def test_test(ids,enterQ,runtime,nodes):
-	j = Simulation.Job(ids,enterQ,runtime,nodes)
-	assert j.runtime >= 0
-	assert 1 == 1
-	
-#generate list of jobs?
+'''

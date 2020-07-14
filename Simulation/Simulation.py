@@ -27,6 +27,10 @@ class Job:
 	def __str__(self):  # type: () -> str
 		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d, startRunning: %d, endRunning: %d\n" % (self.id, self.enterQ,self.runtime, self.nodes2run, self.startRunning, self.endRunning)
 
+
+############
+#Schedulers#
+############
 def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int) -> Optional[Tuple[Job, List[Node]] ]:
 
 	#scheduling assumes all jobs are theoreticly runnable
@@ -67,24 +71,7 @@ def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int
 				break
 		
 		surplus = nodesFreeNow - nodesNeeded
-			
-		#while nodesFreeNow < nodesNeeded:
-			#print ("ping")
-			#if running
-			#jobNextFinished: Job = running.pop(0) #popping schlägt fehl? pop von lehr?
-			
-			#nodesFreeNow += jobNextFinished.nodes2run
-			#time2runFifo = jobNextFinished.startRunning + jobNextFinished.runtime - clock #how to get clock?~= remaining time
-			#when this job finishes in time2runFifo seconds, there will be nodesFreeNow free nodes 
-		
-		
-		
-		#extra nodes, that backfill job might us
-		#surplus = nodesFreeNow - nodesNeeded
-		
-		#get oldest waiting job, that doesn't change the startrunning of fifo job
-		#either would be finished befor fifo job runs
-		#or there would still be enough nodes, if this one runs
+
 		return firstFit(list(filter(lambda j: j.runtime <= time2runFifo or j.nodes2run <= surplus,q)), nodes)
 
 def fifo(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
@@ -194,7 +181,7 @@ class System:
 	def run(self)->List[Job]:
 		while self.q or self.futureJobs or self.running:
 		
-			self.finishJobs()#doesn't work?
+			self.finishJobs()
 			self.jobsEnterQ()
 			
 			while self.scheduleNextJob():

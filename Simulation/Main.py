@@ -1,6 +1,6 @@
 '''TODO:
 
-	(O)-find examples when one scheduler better than other
+	(X)-find examples when one scheduler better than other
 
 	(O)-Testing!!!!!
 		#generator
