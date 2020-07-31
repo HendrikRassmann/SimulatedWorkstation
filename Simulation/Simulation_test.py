@@ -206,6 +206,10 @@ def test_ffEQfifo_allRunnable(q):
 	nodes1k = list(map(Simulation.Node, list(range(50)) ) )#should be max nodes needed
 	assert Simulation.fifo(q, nodes1k) == Simulation.firstFit(q, nodes1k)
 	#doesnt have to be, you know, there might be many right answers
+	
+### lets do some statefull testing next
+
+###
 
 '''
 @settings(max_examples=10000)
