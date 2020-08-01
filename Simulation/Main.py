@@ -1,6 +1,6 @@
 '''INFO
 This uses python 3.8 for := (aka Walrus Operator)
-'''
+py'''
 
 '''TODO:
 
@@ -59,22 +59,23 @@ def main():
 	schedulers = [Simulation.fifo,Simulation.lpt,Simulation.spt]
 	
 	#times per point(accuracy)
-	numberOfIterations = range(1)
-	numberOfJobs = list(range(10,15 +1,1))
-	numberOfNodes = list(range(20,20 +1))
+	numberOfIterations = range(10)
+	numberOfJobs = list(range(250,250 +1,10))
+	numberOfNodes = list(range(10,20 +1))
 	seqR = [0.5] #part of sequential jobs (between 0 and 1)
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = [0]#offline
 	minSeq = [1000] #minimal runtime of sequential jobs
 	maxSeq = list(range(1000,1000+1, 1000))#[1000] #max runtime of sequential jobs
-	minPar = [10] #min runtime of parallel jobs
-	maxPar = [100] #max runtime of parallel jobs
+	minPar = [1000] #min runtime of parallel jobs
+	maxPar = [2000] #max runtime of parallel jobs
 	
-	results = []
 
 	dbConnector = DBConnector.DBConnector()
-	
-	for conf in itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
+	print ("DB connection open, start running")
+	configurations = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar)
+	print (len(list(configurations)))
+	for conf in configurations:
 
 		for i in numberOfIterations:
 			jobs: List[Simulation.Job] = Generator.generate(*conf)
@@ -82,48 +83,12 @@ def main():
 
 				sys: Simulation.System = Simulation.System(jobs.copy(),20,sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
-
+				print ("1 run finished, now to db")
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 
 	del dbConnector
 	
 	stop = timeit.default_timer()
-
-	plotSelect = {
-		"numberOfJobs": lambda p: p[0][0],
-  		"numberOfNodes": lambda p: p[0][1],
-  		"seqR": lambda p: p[0][2],
-  		"largeR": lambda p: p[0][3],
-  		"timespan": lambda p: p[0][4],
-  		"minSeq": lambda p: p[0][5],
-  		"maxSeq": lambda p: p[0][6],
-  		"minPar": lambda p: p[0][7],
-  		"maxPar": lambda p: p[0][8],
-  		"makespan": lambda p: p[1][0],
-  		"flowTime": lambda p: p[1][1],
-  		"avgFlowTime": lambda p: p[1][2],
-  		"maximumLateness": lambda p: p[1][3]	
-	}
-	
-	'''analysis
-	x="numberOfJobs"
-	y="flowTime"
-		
-
-	for sf in schedulers:
-		#results now has multiple runs with same params
-		
-		sfData =list(filter(lambda t: t[2] is sf, results))
-		xs = list(map(plotSelect[x], sfData))
-		ys = list(map(plotSelect[y], sfData))
-		plt.plot(xs,ys,label= sf.__name__)
-		plt.xlabel(x)
-		plt.ylabel(y)
-
-	plt.legend()
-	plt.show()
-	'''
-
 	print('Time: ', stop - start) 
 
 if __name__ == "__main__":

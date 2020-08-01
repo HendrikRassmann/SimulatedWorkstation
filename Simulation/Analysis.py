@@ -6,30 +6,16 @@ from typing import cast, List, Union, Optional, Callable, Tuple, Text, TypeVar, 
 import matplotlib.pyplot as plt
 import numpy as np
 
-plotSelect = {
-		"numberOfJobs": lambda p: p[0][0],
-  		"numberOfNodes": lambda p: p[0][1],
-  		"seqR": lambda p: p[0][2],
-  		"largeR": lambda p: p[0][3],
-  		"timespan": lambda p: p[0][4],
-  		"minSeq": lambda p: p[0][5],
-  		"maxSeq": lambda p: p[0][6],
-  		"minPar": lambda p: p[0][7],
-  		"maxPar": lambda p: p[0][8],
-  		"makespan": lambda p: p[1][0],
-  		"flowTime": lambda p: p[1][1],
-  		"avgFlowTime": lambda p: p[1][2],
-  		"maximumLateness": lambda p: p[1][3]	
-}
 fixed = {
-	"Params.numberOfNodes" : 20,
+	"Params.numberOfJobs" : 250,
+	#"Params.numberOfNodes" : 20,
 	"Params.seqR" : 0.5,
 	"Params.largeR" : 1,
 	"Params.timespan" : 0,
 	"Params.minSeq" : 1000,
 	"Params.maxSeq" : 1000,
-	"Params.minPar" : 10,
-	"Params.maxPar" : 100
+	"Params.minPar" : 1000,
+	"Params.maxPar" : 2000
 }
 
 
@@ -37,18 +23,18 @@ def show():
 	
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "numberOfJobs"
-	yAxis = "makespan"
-	schedulers = ["fifo","lpt","spt"]
+	xAxis = "numberOfNodes"
+	yAxis = "maximumLateness"
+	schedulers = ["fifo","spt","lpt"]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
 		##x,y list für jeden scheduler
 	print ("next: NewLine")
 	print (sfXY["fifo"])
 	docs = dbConnector.find(fixed)
-	print ("not dead yead, plz b4 deleting")
-	#nur ein doc?
+
 	for item in docs:
+		
 		for sf in schedulers:
 			xVaried = item["Params"][xAxis]
 			values = item["Evals"].get(sf)
@@ -57,7 +43,19 @@ def show():
 				yAvg = sum(map (lambda x: x[yAxis], (item["Evals"][sf]) ) ) / numberOfValues
 				sfXY[sf].append((xVaried,yAvg))
 				print (xVaried,yAvg)
-		print (item)
+		#print (item)
+	#plot tse grapf!
+	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
+	for sf in schedulers:
+		lsf = list(map(list, zip(*sfXY[sf])))
+		print (lsf)
+		xValues = lsf[0]
+		yValues = lsf[1]
+		plt.plot(xValues,yValues,label= sf)
+		plt.xlabel(xAxis)
+		plt.ylabel(yAxis)
+	plt.legend()
+	plt.show()
 	
 	
 

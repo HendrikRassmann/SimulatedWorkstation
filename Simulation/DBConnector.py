@@ -18,10 +18,8 @@ class DBConnector:
 	def flush(self):
 		print ("STAAAAAAAAAAAAART FLUSH")
 		for item in self.itemBuffer:
-			print (item)
+			#print (item)
 			for key in item.get("Evals"): #key == should be name of scheduler
-				print (key)
-				print ("Evals."+key)
 				
 				self.collection.find_one_and_update(
 					{"Params" : item["Params"]},
@@ -57,8 +55,7 @@ minSeq, maxSeq ,minPar, maxPar, evals, sf):
 		"Evals": {
 			sf.__name__ : evals
 			}
-		}
-		print (dataPoint)	
+		}	
 		self.itemBuffer.append(dataPoint)
 		if len(self.itemBuffer) >= 100:
 			self.flush()
