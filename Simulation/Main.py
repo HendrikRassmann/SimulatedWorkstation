@@ -59,29 +59,28 @@ def main():
 	schedulers = [Simulation.fifo,Simulation.lpt,Simulation.spt]
 	
 	#times per point(accuracy)
-	numberOfIterations = range(10)
-	numberOfJobs = list(range(250,250 +1,10))
-	numberOfNodes = list(range(10,20 +1))
-	seqR = [0.5] #part of sequential jobs (between 0 and 1)
+	numberOfIterations = range(25)
+	numberOfJobs = list(range(100,100 +1,10))
+	numberOfNodes = list(range(25,25 +1))
+	seqR = [0.66, 0.33, 0.3] #part of sequential jobs (between 0 and 1).
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
-	timespan = [0]#offline
-	minSeq = [1000] #minimal runtime of sequential jobs
+	timespan = [50000]#offline
+	minSeq = [100] #minimal runtime of sequential jobs
 	maxSeq = list(range(1000,1000+1, 1000))#[1000] #max runtime of sequential jobs
-	minPar = [1000] #min runtime of parallel jobs
-	maxPar = [2000] #max runtime of parallel jobs
+	minPar = [100] #min runtime of parallel jobs
+	maxPar = [1000] #max runtime of parallel jobs
 	
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
-	configurations = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar)
-	print (len(list(configurations)))
-	for conf in configurations:
+
+	for conf in itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
 
 		for i in numberOfIterations:
 			jobs: List[Simulation.Job] = Generator.generate(*conf)
 			for sf in schedulers:
 
-				sys: Simulation.System = Simulation.System(jobs.copy(),20,sf)
+				sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
 				print ("1 run finished, now to db")
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)

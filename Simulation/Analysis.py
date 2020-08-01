@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 fixed = {
-	"Params.numberOfJobs" : 250,
-	#"Params.numberOfNodes" : 20,
-	"Params.seqR" : 0.5,
+	"Params.numberOfJobs" : 100,
+	"Params.numberOfNodes" : 25,
+	#"Params.seqR" : 0.5,
 	"Params.largeR" : 1,
-	"Params.timespan" : 0,
-	"Params.minSeq" : 1000,
+	"Params.timespan" : 50000,
+	"Params.minSeq" : 100,
 	"Params.maxSeq" : 1000,
-	"Params.minPar" : 1000,
-	"Params.maxPar" : 2000
+	"Params.minPar" : 100,
+	"Params.maxPar" : 1000
 }
 
 
@@ -23,7 +23,7 @@ def show():
 	
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "numberOfNodes"
+	xAxis = "seqR"
 	yAxis = "maximumLateness"
 	schedulers = ["fifo","spt","lpt"]
 	for sf in schedulers:
@@ -47,7 +47,7 @@ def show():
 	#plot tse grapf!
 	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
 	for sf in schedulers:
-		lsf = list(map(list, zip(*sfXY[sf])))
+		lsf = list(map(list, zip(*sorted(sfXY[sf], key=lambda x:x[0]))))
 		print (lsf)
 		xValues = lsf[0]
 		yValues = lsf[1]
