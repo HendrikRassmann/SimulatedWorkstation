@@ -1,5 +1,5 @@
 import Simulation
-from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
+from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type, Dict, Union
 import random
 
 def jobs100() -> List[Simulation.Job]:
@@ -10,6 +10,8 @@ def jobs100() -> List[Simulation.Job]:
 	for i in range(100):
 		jobs.append(Simulation.Job(id= i, enterQ= i*10, runtime= 1 +((i%15)*5), nodes2run= 1+(i%10) ) )
 	return jobs
+
+
 
 def generate(numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,
 minSeq: int, maxSeq: int ,minPar: int, maxPar: int)->List[Simulation.Job]:

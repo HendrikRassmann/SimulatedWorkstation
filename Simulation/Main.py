@@ -1,17 +1,11 @@
-'''
-MONGO DB STUFF:
-
-'''
-
-'''QUESTIONS:
-run from main with string args, and start dbs and typecheck and stuff
-or make a shell script, that does that stuff? ++++<3+++++++
+'''INFO
+This uses python 3.8 for := (aka Walrus Operator)
 '''
 
 '''TODO:
 
 	2DAY:
-	(O)-add runs to Mongo DB, find BSON represantation
+	
 	(0)-find flakeness (min/max)
 	
 	(O)-Testing!!!!!
@@ -26,37 +20,17 @@ or make a shell script, that does that stuff? ++++<3+++++++
 	(O)-build state full testing in hypothesis (compare to vary input lists)
 	
 	(O)-performance gains
+	(X)-add runs to Mongo DB, find BSON represantation
 	(X)-label axis, analysis selector comprehandable :D
 	(X)-find examples when one scheduler better than other
 	(X)-Draw some cool Graphs
 '''
-'''
-"Params" : {
-		"numberOfJobs": _,
-  		"numberOfNodes: _,
-  		"seqR": _,
-  		"largeR":_,
-  		"timespan":_,
-  		"minSeq": _,
-  		"maxSeq": _,
-  		"minPar": _,
-  		"maxPar": _,
-  		"evals": []
-  		
-}
-"Eval" : {
-		"makespan": _,
-  		"flowTime": _,
-  		"avgFlowTime": _,
-  		"maximumLateness": _
-}
-
-'''
-import sys, getopt
+import sys
 
 import Simulation
 import Generator
 import Analysis
+import DBConnector
 
 from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
 
@@ -85,8 +59,8 @@ def main():
 	schedulers = [Simulation.fifo,Simulation.lpt,Simulation.spt]
 	
 	#times per point(accuracy)
-	numberOfIterations = range(3)
-	numberOfJobs = list(range(250,1000 +1,200))
+	numberOfIterations = range(1)
+	numberOfJobs = list(range(10,15 +1,1))
 	numberOfNodes = list(range(20,20 +1))
 	seqR = [0.5] #part of sequential jobs (between 0 and 1)
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
@@ -97,26 +71,22 @@ def main():
 	maxPar = [100] #max runtime of parallel jobs
 	
 	results = []
-	
-	#addTryCatch
-	client = MongoClient('localhost',27017)
 
-	database = client['pastRunns']
-	collection = database['run1']
+	dbConnector = DBConnector.DBConnector()
 	
 	for conf in itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
-		#print(*conf)
+
 		for i in numberOfIterations:
 			jobs: List[Simulation.Job] = Generator.generate(*conf)
-			print (typeOf(*conf))
 			for sf in schedulers:
-				#acc = (0,0,0,0)
+
 				sys: Simulation.System = Simulation.System(jobs.copy(),20,sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
-				#multiple anylsis => multiple lists
-				#append
-				#results.append( (conf , Analysis.standardAnalysis(finishedJobs) ,sf) )
 
+				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
+
+	del dbConnector
+	
 	stop = timeit.default_timer()
 
 	plotSelect = {
@@ -165,80 +135,10 @@ if __name__ == "__main__":
 		print ("now running stuff, maybe asking for arguments n stuff")
 		main()
 		sys.exit()
+		
 	if sys.argv[1] == "show":
-		#try opening db
-		client = MongoClient('localhost',27017)
-
-		database = client['pastRunns']
-		collection = database['run1']
-		'''
-		"Params" : {
-		"numberOfJobs": _,
-  		"numberOfNodes: _,
-  		"seqR": _,
-  		"largeR":_,
-  		"timespan":_,
-  		"minSeq": _,
-  		"maxSeq": _,
-  		"minPar": _,
-  		"maxPar": _,
-  		"evals": []
-  		
-}
-"Eval" : {
-		"makespan": _,
-  		"flowTime": _,
-  		"avgFlowTime": _,
-  		"maximumLateness": _
-}'''
-		post = {
-			"Params" : {
-			"numberOfJobs": 100,
-  			"numberOfNodes": 10,
-  			"seqR": 0.5,
-  			"largeR": 0.5,
-  			"timespan": 123,
-  			"minSeq": 1,
-  			"maxSeq": 10,
-  			"minPar": 5,
-  			"maxPar": 50}
-  			,
-  			"evals": [{
-  				"makespan": 4,
-  				"flowTime": 4,
-  				"avgFlowTime": 0.4,
-  				"maximumLateness": 12}
-  			]
-		}
-		#post_id = collection.insert_one(post).inserted_id
-		collection.find_one_and_update(
-		{"Params.numberOfJobs": 100}, {'$push': {"evals": {
-				"makespan": 1,
-  				"flowTime": 2,
-  				"avgFlowTime": 0.74,
-  				"maximumLateness": 14
-  				}
-			}
-		}
-		)
-		#make stuff safe:
-			#make sure you find at max 1 entry to add to
-
-		print ((collection.find({})))
-		print (collection.find_one({"Params.numberOfJobs": 100})["evals"])
-		lenOfRuns = len(collection.find_one({"Params.numberOfJobs": 100})["evals"])
-		avgAvgFlowTime = (sum(map(lambda x: x["avgFlowTime"]/lenOfRuns, collection.find_one({"Params.numberOfJobs": 100})["evals"])))
-		print (avgAvgFlowTime)
+		Analysis.show()
 		
-		print (database.list_collection_names())
-		
-		#for post in collection.find({"Params.numberOfJobs": 100}):
-		#	pprint.pprint(post)		
-		
-		
-		print ("now showing stuff, maybe asking for what to show")
-		client.close()
-		sys.exit()
 	else :
 		print ("run with argument halp for help")
 		sys.exit()
