@@ -6,9 +6,9 @@ def jobs100() -> List[Simulation.Job]:
 	jobs: List[Simulation.Job] = []
 	# 10s between jobs
 	# job1 = 1 + id % 10 * 2
-	#def __init__(self, id: int, enterQ : int, runtime: int, nodes2run: int
+	#def __init__(self, id: int, queueingT : int, processingT: int, degreeOP: int
 	for i in range(100):
-		jobs.append(Simulation.Job(id= i, enterQ= i*10, runtime= 1 +((i%15)*5), nodes2run= 1+(i%10) ) )
+		jobs.append(Simulation.Job(id= i, queueingT= i*10, processingT= 1 +((i%15)*5), degreeOP= 1+(i%10) ) )
 	return jobs
 
 
@@ -34,12 +34,12 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int)->List[Simulation.Job]:
 	for i in range(numberOfJobs):
 		
 	#a if condition else b
-	#d: int, enterQ : int, runtime: int, nodes2run
+	#d: int, queueingT : int, processingT: int, degreeOP
 		jobs.append(Simulation.Job(\
 		id=i,\
-		enterQ= random.randint(0,timespan),\
-		runtime= random.randint(minSeq,maxSeq) if (i < seqR*numberOfJobs) else random.randint(minPar, maxPar),\
-		nodes2run= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\
+		queueingT= random.randint(0,timespan),\
+		processingT= random.randint(minSeq,maxSeq) if (i < seqR*numberOfJobs) else random.randint(minPar, maxPar),\
+		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\
 		  ))
 
 	return jobs

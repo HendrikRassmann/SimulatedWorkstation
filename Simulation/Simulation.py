@@ -1,9 +1,6 @@
 #Testing TypeSistem FiFo :D
-
-import functools
 import random
-from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
-print("starting")
+from typing import List, Optional, Callable, Tuple
 
 
 class Node:
@@ -14,18 +11,18 @@ class Node:
 		return "id: %d" % self.id
 		
 class Job:
-	def __init__(self, id: int, enterQ : int, runtime: int, nodes2run: int) -> None:
+	def __init__(self, id: int, queueingT : int, processingT: int, degreeOP: int) -> None:
 		self.id = id
-		self.enterQ = enterQ
-		self.runtime = runtime
+		self.queueingT = queueingT
+		self.processingT = processingT
 		self.startRunning: Optional[int] = -1
-		self.endRunning: Optional[int] = -1
-		self.nodes2run = nodes2run
+		self.completionT: Optional[int] = -1
+		self.degreeOP = degreeOP
 		self.runningOn: List[Node] = []
 		
 	#print star,end,running on, also
 	def __str__(self):  # type: () -> str
-		return "id: %d, enterQ: %d, runtime: %d, nodes2run: %d, startRunning: %d, endRunning: %d\n" % (self.id, self.enterQ,self.runtime, self.nodes2run, self.startRunning, self.endRunning)
+		return "id: %d, queueingT: %d, processingT: %d, degreeOP: %d, startRunning: %d, completionT: %d\n" % (self.id, self.queueingT,self.processingT, self.degreeOP, self.startRunning, self.completionT)
 
 
 ############
@@ -48,9 +45,9 @@ def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int
 	else:
 		
 		#longestWaitingJob:
-		nextJob: Job = min(q, key=lambda j: j.enterQ)
+		nextJob: Job = min(q, key=lambda j: j.queueingT)
 		
-		nodesNeeded: int = nextJob.nodes2run
+		nodesNeeded: int = nextJob.degreeOP
 		#nodes currently free (and future free)
 		nodesFreeNow: int = len(nodes)
 		#when would fifo Job run next?
@@ -60,34 +57,35 @@ def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int
 		assert nodesFreeNow < nodesNeeded
 					
 		#sort running < by point in time, when they will be finished
-		runningByNextDone: List[Job] = sorted(running, key=lambda j: j.startRunning + j.runtime) #sort copy by next to be finished
+          #can be used for "optimistic" backfilling
+		#runningByNextDone: List[Job] = sorted(running, key=lambda j: j.startRunning + j.processingT) #sort copy by next to be finished
 		#find point when there will be enough free nodes 2 run fifo job
 		
 		#pop only on non empty list
 		for r in running:
-			nodesFreeNow += r.nodes2run
-			time2runFifo = r.startRunning + r.runtime - clock
+			nodesFreeNow += r.degreeOP
+			time2runFifo = r.startRunning + r.processingT - clock
 			if (nodesFreeNow >= nodesNeeded):
 				break
 		
 		surplus = nodesFreeNow - nodesNeeded
 
-		return firstFit(list(filter(lambda j: j.runtime <= time2runFifo or j.nodes2run <= surplus,q)), nodes)
+		return firstFit(list(filter(lambda j: j.processingT <= time2runFifo or j.degreeOP <= surplus,q)), nodes)
 
 def fifo(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
 	#nodes will be selected randomly
 	if len(q) > 0 and len(nodes) > 0:		
 		#min doesn't work with types :(
-		firstEnterQ: Job = min(q, key=lambda j : j.enterQ)#smalles element
+		firstEnterQ: Job = min(q, key=lambda j : j.queueingT)#smalles element
 		
 		#firstEnterQ: Job = q[0]
 		#for job in q:
-		#	if job.enterQ < firstEnterQ.enterQ:
+		#	if job.queueingT < firstEnterQ.queueingT:
 		#		firstEnterQ = job
 
 		#assert isinstance(nodes, List[Node])
-		if (firstEnterQ.nodes2run <= len(nodes) ):	
-			return (firstEnterQ, nodes[:firstEnterQ.nodes2run])
+		if (firstEnterQ.degreeOP <= len(nodes) ):	
+			return (firstEnterQ, nodes[:firstEnterQ.degreeOP])
 			
 	return None
 
@@ -96,7 +94,7 @@ def firstFit(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=N
 	if len(q) > 0 and len(nodes) > 0:
 		#min doesn't work with types :(
 		#only runnable Jobs
-		runnableJobs: List[Job] = list( filter(lambda x: (x.nodes2run <= len(nodes)),q) )
+		runnableJobs: List[Job] = list( filter(lambda x: (x.degreeOP <= len(nodes)),q) )
 		return fifo(runnableJobs, nodes)
 			
 	return None
@@ -105,20 +103,20 @@ def lpt(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None )
 	#nodes will be selected randomly
 	if not q or not nodes: return None
 
-	nextJob: Job = (max(q,key=lambda x: x.runtime))
-	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+	nextJob: Job = (max(q,key=lambda x: x.processingT))
+	return (nextJob,nodes[:nextJob.degreeOP]) if nextJob.degreeOP <= len (nodes) else None
 
 def spt(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
 	#nodes will be selected randomly
 	if not q or not nodes: return None
 	
-	nextJob: Job = (min(q,key=lambda x: x.runtime))
-	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+	nextJob: Job = (min(q,key=lambda x: x.processingT))
+	return (nextJob,nodes[:nextJob.degreeOP]) if nextJob.degreeOP <= len (nodes) else None
 
 def rand(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None ) -> Optional[Tuple[Job, List[Node]]]:
 	if not q or not nodes: return None
 	nextJob: Job = random.choice(q)
-	return (nextJob,nodes[:nextJob.nodes2run]) if nextJob.nodes2run <= len (nodes) else None
+	return (nextJob,nodes[:nextJob.degreeOP]) if nextJob.degreeOP <= len (nodes) else None
 	
 class System:
 	def __init__(self,jobs: List[Job], nodesAvl: int, scheduler:\
@@ -143,17 +141,17 @@ class System:
 	
 	def finishJobs(self):
 	#newly finished Jobs:
-		finishedJobs: List[Job] = list(filter(lambda j : j.runtime + j.startRunning <= self.time, self.running)) #saves done jobs
-		self.running = list(filter(lambda j : j.startRunning + j.runtime > self.time, self.running)) #removes done jobs
+		finishedJobs: List[Job] = list(filter(lambda j : j.processingT + j.startRunning <= self.time, self.running)) #saves done jobs
+		self.running = list(filter(lambda j : j.startRunning + j.processingT > self.time, self.running)) #removes done jobs
 		for j in finishedJobs:
-			j.endRunning = self.time #safe time
+			j.completionT = self.time #safe time
 			self.nodesAvl += j.runningOn #give nodes back
 		#print ("jobs finished: %d" % len(finishedJobs)
 		self.finished = self.finished + finishedJobs #transfaire to finished list
 		
 	def jobsEnterQ(self):
-		self.q =  self.q + list(filter(lambda j : j.enterQ <= self.time, self.futureJobs))
-		self.futureJobs = list(filter(lambda j : j.enterQ > self.time, self.futureJobs))
+		self.q =  self.q + list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
+		self.futureJobs = list(filter(lambda j : j.queueingT > self.time, self.futureJobs))
 				
 	def tick(self):
 		self.time += 1

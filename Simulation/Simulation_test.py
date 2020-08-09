@@ -7,10 +7,10 @@ from hypothesis.strategies import builds
 import Simulation
 import Analysis
 from Simulation import Job
-#int: id, enterQ, runtime, nodes
+#int: id, queueingT, processingT, nodes
 
 generate_id = st.integers(0,100)
-generate_enterQ = st.integers(0,100)
+generate_queueingTime = st.integers(0,100)
 generate_runtime = st.integers(1,100)
 generate_nodes2run = st.integers(1,20)
 
@@ -19,12 +19,12 @@ generate_node = builds(Simulation.Node, st.integers(0,50))
 generate_job = builds(\
 Simulation.Job,\
 generate_id,\
-generate_enterQ,\
+generate_queueingTime,\
 generate_runtime,\
 generate_nodes2run)
 
 generate_id_small = st.integers(0,0)
-generate_enterQ_small = st.integers(0,10)
+generate_queueingTime_small = st.integers(0,10)
 generate_runtime_small = st.integers(1,10)
 generate_nodes2run_small = st.integers(1,5)
 
@@ -34,12 +34,12 @@ generate_list_jobs = st.lists(generate_job, min_size=0, max_size=50)
 generate_job_small = builds(\
 Simulation.Job,\
 generate_id_small,\
-generate_enterQ_small,\
+generate_queueingTime_small,\
 generate_runtime_small,\
 generate_nodes2run_small)
 
 #st.lists(twoints, unique_by=(lambda x: x[0], lambda x: x[1]))
-generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.enterQ) )
+generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.queueingT) )
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
 
@@ -83,7 +83,7 @@ def test_backfilling(q):
 	
 	print(len(fifoRun))
 	for f,b in zip(fifoRun,backfillingRun):#len 0?
-		assert b.enterQ <= f.enterQ'''
+		assert b.queueingT <= f.queueingT'''
 
 
 @given(generate_list_jobs, generate_list_nodes)
@@ -95,12 +95,12 @@ def test_random(q,n):
 			assert nextJob[0] in q
 			for node in nextJob[1]: assert node in n
 		else:
-			assert max( map(lambda j: j.nodes2run,q)) > len(n)
+			assert max( map(lambda j: j.degreeOP,q)) > len(n)
 		#one not runnable job
 
 @given(generate_list_jobs, generate_list_nodes)
 def test_lpt(q,n):
-	# picks a job with the longest runtime
+	# picks a job with the longest processingT
 	# found one -> no other job longer
 	# none	-> either no job runnable
 	#	-> or one of the longest not runnable
@@ -113,12 +113,12 @@ def test_lpt(q,n):
 	else:	
 		if nextJob is None: #only runs the longest job
 
-			maxPT = max( map(lambda j: j.runtime,q) ) #max runtime in q			
+			maxPT = max( map(lambda j: j.processingT,q) ) #max processingT in q			
 			nodesAvl = len(n)
-			assert max(filter(lambda j: j.runtime == maxPT, q), key=lambda j: j.nodes2run).nodes2run > nodesAvl
+			assert max(filter(lambda j: j.processingT == maxPT, q), key=lambda j: j.degreeOP).degreeOP > nodesAvl
 						
 		else:
-			for j in q: assert j.runtime <= nextJob[0].runtime
+			for j in q: assert j.processingT <= nextJob[0].processingT
 
 #some cool shit with inverting runtimes maybe?
 @given(generate_list_jobs, generate_list_nodes)
@@ -132,12 +132,12 @@ def test_spt(q,n):
 	else:	
 		if nextJob is None: #only runs the longest job
 
-			minPT = min( map(lambda j: j.runtime,q) ) #max runtime in q			
+			minPT = min( map(lambda j: j.processingT,q) ) #max processingT in q			
 			nodesAvl = len(n)
-			assert max(filter(lambda j: j.runtime == minPT, q), key=lambda j: j.nodes2run).nodes2run > nodesAvl#fails
+			assert max(filter(lambda j: j.processingT == minPT, q), key=lambda j: j.degreeOP).degreeOP > nodesAvl#fails
 						
 		else:
-			for j in q: assert j.runtime >= nextJob[0].runtime
+			for j in q: assert j.processingT >= nextJob[0].processingT
 
 
 def test_fifo_unit():
@@ -169,7 +169,7 @@ def test_fifo_unit():
 
 
 def test_firstFit_unit():
-#int: id, enterQ, runtime, nodes
+#int: id, queueingT, processingT, nodes
 	emptyJobList = []
 	emptyNodeList = []
 	onePool = [3]
@@ -199,7 +199,7 @@ def test_fifo(q,nodes):
 	pair = Simulation.fifo(q, nodes)
 	if pair != None:
 		assert len(pair[1]) >=1
-		assert pair[0].nodes2run <= len(pair[1])
+		assert pair[0].degreeOP <= len(pair[1])
 
 @given(generate_list_jobs)
 def test_ffEQfifo_allRunnable(q):

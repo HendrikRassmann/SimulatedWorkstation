@@ -1,11 +1,8 @@
-'''INFO
-This uses python 3.8 for := (aka Walrus Operator)
-py'''
-
 '''TODO:
 
 	2DAY:
-	
+	(O) different machine speed
+	(O) false times
 	(0)-find flakeness (min/max)
 	
 	(O)-Testing!!!!!
@@ -65,10 +62,10 @@ def main():
 	seqR = [0.66, 0.33, 0.3] #part of sequential jobs (between 0 and 1).
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = [50000]#offline
-	minSeq = [100] #minimal runtime of sequential jobs
-	maxSeq = list(range(1000,1000+1, 1000))#[1000] #max runtime of sequential jobs
-	minPar = [100] #min runtime of parallel jobs
-	maxPar = [1000] #max runtime of parallel jobs
+	minSeq = [100] #minimal processingT of sequential jobs
+	maxSeq = list(range(1000,1000+1, 1000))#[1000] #max processingT of sequential jobs
+	minPar = [100] #min processingT of parallel jobs
+	maxPar = [1000] #max processingT of parallel jobs
 	
 
 	dbConnector = DBConnector.DBConnector()
