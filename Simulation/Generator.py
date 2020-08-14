@@ -23,10 +23,8 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int)->List[Simulation.Job]:
 	assert 0 <= seqR <= 1
 	assert 0 <= largeR <= 1 
 	assert timespan >= 0
-	assert minSeq >= 0
-	assert maxSeq >= minSeq
-	assert minPar >= 0
-	assert maxPar >= minPar
+	assert maxSeq >= minSeq >= 0
+	assert maxPar >= minPar >= 0
 	#remember: // is integer division
 
 	#approach: make multiple lists, shuffle list, zip
@@ -42,6 +40,8 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int)->List[Simulation.Job]:
 		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\
 		  ))
 
+	random.shuffle(jobs)
+	assert len(jobs) == numberOfJobs
 	return jobs
 
 #print (*generate(100,5,0.5,0.5,1000,1,50,10,100))

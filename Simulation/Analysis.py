@@ -24,7 +24,7 @@ def show():
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
 	xAxis = "maxSeq"
-	yAxis = "avgFlowTime"
+	yAxis = "makespan"
 	schedulers = ["fifo","spt","lpt"]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys

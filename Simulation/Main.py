@@ -6,6 +6,7 @@ sudo Mongod : starts mongoDB
 
 	2DAY:
 	(O) different machine speed
+	
 	(O) false times
 	(0)-find flakeness (min/max)
 	
@@ -59,7 +60,7 @@ def main():
 	
 	#numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,minSeq: int, maxSeq: int ,minPar: int, maxPar: int)
 	
-	schedulers = [Simulation.fifo,Simulation.lpt,Simulation.spt]
+	schedulers = [Simulation.fifo, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
 	
 	#times per point(accuracy)
 	numberOfIterations = list(range(1))
@@ -69,7 +70,7 @@ def main():
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = [0]# 0 <==> offline
 	minSeq = [1000] #minimal processingT of sequential jobs
-	maxSeq = list(range(1000,100000+1, 1000))#[1000] #max processingT of sequential jobs
+	maxSeq = list(range(1000,101000+1, 10000))#[1000] #max processingT of sequential jobs
 	minPar = [100] #min processingT of parallel jobs
 	maxPar = [1000] #max processingT of parallel jobs
 	

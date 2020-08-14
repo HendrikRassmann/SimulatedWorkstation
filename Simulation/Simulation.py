@@ -1,5 +1,6 @@
 #Testing TypeSistem FiFo :D
 import random
+import math
 from typing import List, Optional, Callable, Tuple
 
 
@@ -15,11 +16,13 @@ class Job:
 		self.id = id
 		self.queueingT = queueingT
 		self.processingT = processingT
-		self.startRunning: Optional[int] = -1
-		self.completionT: Optional[int] = -1
+		self.startRunning: Optional[int] = None
+		self.completionT: Optional[int] = None
 		self.degreeOP = degreeOP
 		self.runningOn: List[Node] = []
-		
+	
+	
+	#def schedule(self,)	
 	#print star,end,running on, also
 	def __str__(self):  # type: () -> str
 		return "id: %d, queueingT: %d, processingT: %d, degreeOP: %d, startRunning: %d, completionT: %d\n" % (self.id, self.queueingT,self.processingT, self.degreeOP, self.startRunning, self.completionT)
@@ -35,15 +38,16 @@ def backfilling (q: List[Job], nodes: List[Node], running: List[Job], clock: int
 	#edgecases:
 	
 	if not running: #nothing running ->fifo
-		return fifo(q,nodes,running,clock)	
+		return fifo(q,nodes,running,clock)
+			
 	if not q or len(nodes) == 0:#noting to run (with) -> None
 		return None
 	
 	fifoJob: Optional[Tuple[Job, List[Node]]] = fifo(q,nodes,running)
+	
 	if fifoJob is not None:
 		return fifoJob
-	else:
-		
+	else:		
 		#longestWaitingJob:
 		nextJob: Job = min(q, key=lambda j: j.queueingT)
 		
@@ -78,12 +82,6 @@ def fifo(q: List[Job], nodes: List[Node], running: List[Job]=[], clock:int=None 
 		#min doesn't work with types :(
 		firstEnterQ: Job = min(q, key=lambda j : j.queueingT)#smalles element
 		
-		#firstEnterQ: Job = q[0]
-		#for job in q:
-		#	if job.queueingT < firstEnterQ.queueingT:
-		#		firstEnterQ = job
-
-		#assert isinstance(nodes, List[Node])
 		if (firstEnterQ.degreeOP <= len(nodes) ):	
 			return (firstEnterQ, nodes[:firstEnterQ.degreeOP])
 			
@@ -126,6 +124,8 @@ class System:
 		#online, finished list inside System or reference?
 		
 		#list nodes with name 0..n(odess)
+		self.assertNodes = nodesAvl
+		self.assertNumberOfJobs = len(jobs)
 		self.time: int = 0
 		self.nodesAvl: List[Node] = [] #("free nodes")
 		for i in range(nodesAvl):
@@ -141,16 +141,15 @@ class System:
 	
 	def finishJobs(self):
 	#newly finished Jobs:
-		finishedJobs: List[Job] = list(filter(lambda j : j.processingT + j.startRunning <= self.time, self.running)) #saves done jobs
-		self.running = list(filter(lambda j : j.startRunning + j.processingT > self.time, self.running)) #removes done jobs
+		finishedJobs: List[Job] = list(filter(lambda j : j.completionT <= self.time, self.running)) #saves done jobs
+		self.running = list(filter(lambda j : j.completionT > self.time, self.running)) #removes done jobs
 		for j in finishedJobs:
-			j.completionT = self.time #safe time
 			self.nodesAvl += j.runningOn #give nodes back
 		#print ("jobs finished: %d" % len(finishedJobs)
 		self.finished = self.finished + finishedJobs #transfaire to finished list
 		
 	def jobsEnterQ(self):
-		self.q =  self.q + list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
+		self.q +=  list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
 		self.futureJobs = list(filter(lambda j : j.queueingT > self.time, self.futureJobs))
 				
 	def tick(self):
@@ -164,19 +163,20 @@ class System:
 			#remove scheduled job
 			self.q.remove(nextJob[0])
 			nextJob[0].startRunning = self.time
-			nextJob[0].runningOn = nextJob[1]	
+			nextJob[0].runningOn = nextJob[1]
+			nextJob[0].completionT = self.time + math.ceil(nextJob[0].processingT / sum(map(lambda j: j.speed, nextJob[1])))
+			#print (nextJob[0].completionT)
 			#remove now used nodes form avl
 			for n in nextJob[1]:
 				self.nodesAvl.remove(n)
 			
 			self.running.append(nextJob[0])
-			#self.nodesAvl = cast(List[Node],list_diff(self.nodesAvl, nextJob[1]))
-			#job to running
-			#set start running time
-			#use nodes
+
 			return True
 		
 	def run(self)->List[Job]:
+		assert (sum (map (lambda j: j.degreeOP, self.futureJobs))) == len (self.futureJobs) #just sequential jobs
+		assert (self.assertNodes == len(self.nodesAvl) + sum (map(lambda j: j.runningOn, self.running)))
 		while self.q or self.futureJobs or self.running:
 		
 			self.finishJobs()
@@ -190,4 +190,5 @@ class System:
 				print ("finished: %d", len(self.finished))'''
 			
 			self.tick()
+		assert len(self.finished) == self.assertNumberOfJobs
 		return self.finished
