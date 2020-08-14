@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 fixed = {
-	"Params.numberOfJobs" : 100,
-	"Params.numberOfNodes" : 25,
-	#"Params.seqR" : 0.5,
-	"Params.largeR" : 1,
-	"Params.timespan" : 50000,
-	"Params.minSeq" : 100,
-	"Params.maxSeq" : 1000,
-	"Params.minPar" : 100,
-	"Params.maxPar" : 1000
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : 10,
+	"Params.seqR" : 1,
+	#"Params.largeR" : 1,
+	"Params.timespan" : 0,
+	"Params.minSeq" : 1000,
+	#"Params.maxSeq" : 1000, vary
+	#"Params.minPar" : 100,
+	#"Params.maxPar" : 1000
 }
 
 
@@ -23,8 +23,8 @@ def show():
 	
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "seqR"
-	yAxis = "maximumLateness"
+	xAxis = "maxSeq"
+	yAxis = "avgFlowTime"
 	schedulers = ["fifo","spt","lpt"]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys

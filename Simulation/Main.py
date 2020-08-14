@@ -1,3 +1,7 @@
+'''
+sudo Mongod : starts mongoDB
+'''
+
 '''TODO:
 
 	2DAY:
@@ -15,6 +19,8 @@
 		*tick random time (1..10)
 	(O)-find nice invariants to check
 	(O)-build state full testing in hypothesis (compare to vary input lists)
+
+	(O)-fix Random. once a job is choosen, it should stay choosen until it is started (Prob.)
 	
 	(O)-performance gains
 	(X)-add runs to Mongo DB, find BSON represantation
@@ -56,22 +62,29 @@ def main():
 	schedulers = [Simulation.fifo,Simulation.lpt,Simulation.spt]
 	
 	#times per point(accuracy)
-	numberOfIterations = range(25)
-	numberOfJobs = list(range(100,100 +1,10))
-	numberOfNodes = list(range(25,25 +1))
-	seqR = [0.66, 0.33, 0.3] #part of sequential jobs (between 0 and 1).
+	numberOfIterations = list(range(1))
+	numberOfJobs = list(range(250,250 +1,10))
+	numberOfNodes = list(range(10,10 +1))
+	seqR = [1] #part of sequential jobs (between 0 and 1).
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
-	timespan = [50000]#offline
-	minSeq = [100] #minimal processingT of sequential jobs
-	maxSeq = list(range(1000,1000+1, 1000))#[1000] #max processingT of sequential jobs
+	timespan = [0]# 0 <==> offline
+	minSeq = [1000] #minimal processingT of sequential jobs
+	maxSeq = list(range(1000,100000+1, 1000))#[1000] #max processingT of sequential jobs
 	minPar = [100] #min processingT of parallel jobs
 	maxPar = [1000] #max processingT of parallel jobs
 	
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
+	doneRuns = 0
+	product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar)
+	numberOfRuns =\
+	 len(numberOfIterations)*len(numberOfJobs)*len(numberOfNodes)*\
+	 len(seqR)*len(largeR)*len(timespan)*len(minSeq)*len(maxSeq)*\
+	 len(minPar)*len(maxPar)*len(numberOfIterations)*len(schedulers)
+	print (numberOfRuns)
 
-	for conf in itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
+	for conf in product:#itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
 
 		for i in numberOfIterations:
 			jobs: List[Simulation.Job] = Generator.generate(*conf)
@@ -79,8 +92,9 @@ def main():
 
 				sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
-				print ("1 run finished, now to db")
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
+				doneRuns += 1
+				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
 
 	del dbConnector
 	
