@@ -175,7 +175,7 @@ class System:
 			return True
 		
 	def run(self)->List[Job]:
-		assert (sum (map (lambda j: j.degreeOP, self.futureJobs))) == len (self.futureJobs) #just sequential jobs
+		
 		assert (self.assertNodes == len(self.nodesAvl) + sum (map(lambda j: j.runningOn, self.running)))
 		while self.q or self.futureJobs or self.running:
 		

@@ -46,12 +46,18 @@ def show():
 		#print (item)
 	#plot tse grapf!
 	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
+	
+	algoRep = {
+		"fifo":"+",
+		"spt":"x",
+		"lpt":"*"}
+	
 	for sf in schedulers:
 		lsf = list(map(list, zip(*sorted(sfXY[sf], key=lambda x:x[0]))))
 		print (lsf)
 		xValues = lsf[0]
 		yValues = lsf[1]
-		plt.plot(xValues,yValues,label= sf)
+		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
 		plt.xlabel(xAxis)
 		plt.ylabel(yAxis)
 	plt.legend()
@@ -92,9 +98,42 @@ def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
 	#print ("Standard Analysis")
 	#print ("makespan: %d", makespan(jobs) )
 	#print ("flowtime: %d", flowTime(jobs) )
-	#print ("avg flowtime: %d", avgFlowTime(jobs))
+	#print ("avgflowtime: %d", avgFlowTime(jobs))
 	#print ("maximum lateness: %d", maximumLateness(jobs))
 	return resultDict
-#def conf2Dict()
+
+def run2String(jobs: List[Simulation.Job])->str:
+	
+	#assumption: complete Run
+	#assumption: starts at 0
+	#assumption: 0 <= id < 10
+	lastCompletion: int = max(jobs,key=(lambda j:j.completionT)).completionT
+	
+	#legende:
+	#id,qtime,paral
+	legend: str = "".join(list(map(lambda j: "id: %d, queueingT: %d, processingTime: %d, degreeOfParallelism: %d\n" % (j.id, j.queueingT,j.processingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
+	#nodes: #QTimes später
+	#start,end,id
+	nodesInRun: Dict[int,List[Tuple[int,int,int]]] = {}
+	for j in jobs:
+		for n in j.runningOn:
+			if n.id in nodesInRun:
+				nodesInRun[n.id].append( (j.startRunning, j.completionT, j.id) )
+			else:
+				nodesInRun[n.id]=[(j.startRunning, j.completionT, j.id)]
+	
+	for l in nodesInRun:
+		nodesInRun[l].sort(key=lambda x:x[0]) #sorted by start
+	nodeStrings:Dict[int,str] = {}
+	for l in nodesInRun:
+		nodeStrings[l]=['-']*lastCompletion
+		for j in nodesInRun[l]:
+			nodeStrings[l][j[0]:j[1]] = [str(j[2])]*(j[1]-j[0])
+		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
+
+	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
+
+		
+	
 	
 	

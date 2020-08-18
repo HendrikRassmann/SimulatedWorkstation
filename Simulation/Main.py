@@ -1,5 +1,7 @@
 '''
+python 3.6
 sudo Mongod : starts mongoDB
+python3 -m pytest
 '''
 
 '''TODO:
@@ -60,21 +62,19 @@ def main():
 	
 	#numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,minSeq: int, maxSeq: int ,minPar: int, maxPar: int)
 	
-	schedulers = [Simulation.fifo, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
+	schedulers = [Simulation.fifo]#, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
 	
-	#times per point(accuracy)
 	numberOfIterations = list(range(1))
-	numberOfJobs = list(range(250,250 +1,10))
-	numberOfNodes = list(range(10,10 +1))
+	numberOfJobs = list(range(5,5 +1,10))
+	numberOfNodes = list(range(2,2 +1))
 	seqR = [1] #part of sequential jobs (between 0 and 1).
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = [0]# 0 <==> offline
-	minSeq = [1000] #minimal processingT of sequential jobs
-	maxSeq = list(range(1000,101000+1, 10000))#[1000] #max processingT of sequential jobs
+	minSeq = [5] #minimal processingT of sequential jobs
+	maxSeq = list(range(10,10+1, 10000))#[1000] #max processingT of sequential jobs
 	minPar = [100] #min processingT of parallel jobs
 	maxPar = [1000] #max processingT of parallel jobs
 	
-
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
@@ -96,6 +96,7 @@ def main():
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 				doneRuns += 1
 				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
+				#print (Analysis.run2String(finishedJobs))
 
 	del dbConnector
 	

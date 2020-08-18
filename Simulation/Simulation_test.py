@@ -1,7 +1,3 @@
-#from hypothesis.strategies import integers
-
-#assert 0 == 1
-
 from hypothesis import given, settings, note, strategies as st
 from hypothesis.strategies import builds
 import Simulation
@@ -38,7 +34,27 @@ generate_queueingTime_small,\
 generate_runtime_small,\
 generate_nodes2run_small)
 
-#st.lists(twoints, unique_by=(lambda x: x[0], lambda x: x[1]))
+#here important to work, 
+def generate_job_params(maxNodes, maxRuntime, maxQT):
+	return builds(Simulation.Job,\
+	 st.integers(0,0),\
+	 st.integers(0,maxQT),\
+	 st.integers(1,maxRuntime),\
+	 st.integers(1,maxNodes) )
+
+def generate_System_and_Jobs(maxNodes, maxNumberOfJobs, maxRuntime, maxQT):
+	#unique ids: set later in Test!
+	#flatmap:
+	return st.integers(1,maxNodes).flatmap(lambda x:\
+		st.tuples(st.lists(generate_job_params(x,maxRuntime,maxQT),min_size=2,max_size=maxNumberOfJobs), st.integers(x,x)) )
+	#result = st.integers(1,maxNodes).map(lambda x: (generate_list_jobs_small, st.integers(x,x)) ) 
+	#print("exampleXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	#print(result.example())
+	#return result
+	#return lambda maxQT: st.tuples(generate_list_jobs_small,st.integers(maxQT)) )(
+	#return st.tuples(generate_list_jobs_small, st.integers(5,5))
+	#return st.lists(generate_job_params(maxNodes,maxRuntime,maxQT),max_size=maxNumberOfJobs)
+
 generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.queueingT) )
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
@@ -53,7 +69,7 @@ generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )
 # (X) rand
 #####################
 
-@settings(max_examples=30001)
+@settings(max_examples=300)
 @given(generate_list_jobs_small)#unique ids
 def test_backfilling(q):
 	#small list has id 0
@@ -124,8 +140,7 @@ def test_lpt(q,n):
 @given(generate_list_jobs, generate_list_nodes)
 def test_spt(q,n):
 	nextJob = Simulation.spt(q,n)
-	note("".join(map(str,q)) )
-	note("number of nodesAvl: %d" %len(n))
+
 	#q or nodes empty
 	if not (q and n):
 		assert nextJob is None
@@ -211,24 +226,27 @@ def test_ffEQfifo_allRunnable(q):
 
 ###
 
-'''
-@settings(max_examples=10000)
-@given(generate_list_jobs_small)
-def test_whenFiFoFirstFitFlowTime(q):
-
-	sysFiFo: Simulation.System = Simulation.System(q.copy(),5,Simulation.fifo)
-	sysFirstFit: Simulation.System = Simulation.System(q.copy(),5,Simulation.firstFit)
+@settings(max_examples=100)
+@given(generate_System_and_Jobs(maxNodes=5, maxNumberOfJobs=5, maxRuntime=10, maxQT=10))
+def test_whenFiFoFirstFitFlowTime(listANDnodes):
+	note("XXXXXXXXXXXXXXXXXXXXXXXXXXX")
+	note(listANDnodes)
+	q=listANDnodes[0]
+	n=listANDnodes[1]
+	sysFiFo: Simulation.System = Simulation.System(q.copy(),n,Simulation.fifo)
+	sysFirstFit: Simulation.System = Simulation.System(q.copy(),n,Simulation.firstFit)
 	
 	fifoRun = sysFiFo.run()
 	flowTimeFifo =  Analysis.makespan(fifoRun)
 	firstFitRun = sysFirstFit.run()
 	flowTimeFirstFit = Analysis.makespan(firstFitRun)
-	note("".join(map(str,firstFitRun)))
-	note("".join(map(str,q)) )
-	note("#OfNodes: "+str(5) )
+	note(Analysis.run2String(fifoRun))
+	note(Analysis.run2String(firstFitRun))
+	#note("".join(map(str,firstFitRun)))
+	#note("".join(map(str,q)) )
+	#note("#OfNodes: "+str(5) )
 	
 	#print(len(q))
 	#print(*q,sep = "\n")
 	#print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
 	assert flowTimeFifo <= flowTimeFirstFit 
-'''
