@@ -1,3 +1,15 @@
+def nice (tupJobsNodes):
+	jobList = tupJobsNodes[0]
+	nrNodes = tupJobsNodes[1]
+	nrJobs = len(jobList)
+	jobIDs = list(range(0,nrJobs))
+	for j in jobList:
+		j.id = jobIDs.pop()
+	
+	return lambda scheduler: Simulation.System(jobList.copy(),nrNodes,scheduler)
+	
+
+
 from hypothesis import given, settings, note, strategies as st
 from hypothesis.strategies import builds
 import Simulation
@@ -42,19 +54,13 @@ def generate_job_params(maxNodes, maxRuntime, maxQT):
 	 st.integers(1,maxRuntime),\
 	 st.integers(1,maxNodes) )
 
-def generate_System_and_Jobs(maxNodes, maxNumberOfJobs, maxRuntime, maxQT):
+def generate_System_and_Jobs(maxNodes, maxNumberOfJobs, maxRuntime, maxQT):#give scheduler, return system ready2run
 	#unique ids: set later in Test!
 	#flatmap:
+	ids = list(range(0,maxNumberOfJobs))
 	return st.integers(1,maxNodes).flatmap(lambda x:\
-		st.tuples(st.lists(generate_job_params(x,maxRuntime,maxQT),min_size=2,max_size=maxNumberOfJobs), st.integers(x,x)) )
-	#result = st.integers(1,maxNodes).map(lambda x: (generate_list_jobs_small, st.integers(x,x)) ) 
-	#print("exampleXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-	#print(result.example())
-	#return result
-	#return lambda maxQT: st.tuples(generate_list_jobs_small,st.integers(maxQT)) )(
-	#return st.tuples(generate_list_jobs_small, st.integers(5,5))
-	#return st.lists(generate_job_params(maxNodes,maxRuntime,maxQT),max_size=maxNumberOfJobs)
-
+		st.tuples(st.lists(generate_job_params(x,maxRuntime,maxQT),min_size=2,max_size=maxNumberOfJobs), st.integers(x,x)) ).map(nice)
+	
 generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.queueingT) )
 
 generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
@@ -229,24 +235,19 @@ def test_ffEQfifo_allRunnable(q):
 @settings(max_examples=100)
 @given(generate_System_and_Jobs(maxNodes=5, maxNumberOfJobs=5, maxRuntime=10, maxQT=10))
 def test_whenFiFoFirstFitFlowTime(listANDnodes):
-	note("XXXXXXXXXXXXXXXXXXXXXXXXXXX")
-	note(listANDnodes)
-	q=listANDnodes[0]
-	n=listANDnodes[1]
-	sysFiFo: Simulation.System = Simulation.System(q.copy(),n,Simulation.fifo)
-	sysFirstFit: Simulation.System = Simulation.System(q.copy(),n,Simulation.firstFit)
+
+	sysFiFo: Simulation.System = listANDnodes(Simulation.fifo)
+	sysFirstFit: Simulation.System = listANDnodes(Simulation.firstFit)
+
 	
 	fifoRun = sysFiFo.run()
 	flowTimeFifo =  Analysis.makespan(fifoRun)
+	note(flowTimeFifo)
+	note(Analysis.run2String(fifoRun))
+	"""---------------------------------------"""
 	firstFitRun = sysFirstFit.run()
 	flowTimeFirstFit = Analysis.makespan(firstFitRun)
+	note(flowTimeFirstFit)
 	note(Analysis.run2String(fifoRun))
-	note(Analysis.run2String(firstFitRun))
-	#note("".join(map(str,firstFitRun)))
-	#note("".join(map(str,q)) )
-	#note("#OfNodes: "+str(5) )
-	
-	#print(len(q))
-	#print(*q,sep = "\n")
-	#print ("fifoFlowTime %d, FirstFitFlowtime %d" %(flowTimeFifo,flowTimeFirstFit) )
+	note("XXXXXXXXXXXXXXXXXXXXXXXXXXX")
 	assert flowTimeFifo <= flowTimeFirstFit 
