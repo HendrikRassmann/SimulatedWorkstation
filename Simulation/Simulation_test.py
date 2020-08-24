@@ -232,7 +232,7 @@ def test_ffEQfifo_allRunnable(q):
 
 ###
 
-@settings(max_examples=100)
+@settings(max_examples=10000)
 @given(generate_System_and_Jobs(maxNodes=5, maxNumberOfJobs=5, maxRuntime=10, maxQT=10))
 def test_whenFiFoFirstFitFlowTime(listANDnodes):
 
