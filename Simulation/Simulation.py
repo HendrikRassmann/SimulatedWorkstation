@@ -39,7 +39,8 @@ class System:
 #Schedulers#
 ############
 	def fit(self, f: Callable[[List[Job]],Optional[Job]], q:[List[Job]]  ) -> Optional[Job]:
-		return f (filter(lambda j: j.degreeOP <= self.len(nodesAvl),q))
+		filteredList: List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl),q))
+		return f(filteredList)
 	#use (wrapped_partial (f,))(q)
 
 	def backfilling (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
@@ -47,11 +48,11 @@ class System:
 		fPick: Optional[Job] = f(q)
 		if fPick is None:
 			return None #q empty
-		if self.nodesAvl >= fPick.degreeOP:
+		if len(self.nodesAvl) >= fPick.degreeOP:
 			return fPick
 		else:
 			nodesNeeded: int = fPick.degreeOP
-			nodesFreeNow: int = len(nodesAvl)
+			nodesFreeNow: int = len(self.nodesAvl)
 			runningByCompletionTime = sorted(self.running, key =lambda j: j.completionT)
 			time2runF: int = None
 			for r in runningByCompletionTime:
@@ -61,10 +62,11 @@ class System:
 				else:
 					break #bug potential: what if multiple nodes get free at same time => more surplus than calculated!
 
-			return f(filter(q, lambda j:j.processingT <= (time2runF - self.time)))
+			filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time),q))
+			return f(filteredList)
 
 	def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
-		fPick: Optional[Job] = f(q)
+		fPick: Optional[Job] = f(self,q)
 		if fPick is None:
 			return None #q empty
 		if self.nodesAvl >= fPick.degreeOP:
@@ -81,26 +83,44 @@ class System:
 				else:
 					break #bug potential: what if multiple nodes get free at same time => more surplus than calculated!
 
-					#the second or claus makes it optimistic 
+					#the second or claus makes it optimistic
 			return f(filter(q, lambda j:j.processingT <= (time2runF - self.time) or j.degreeOP <= (nodesFreeNow - nodesNeeded)))
 
-	def fifo(q: List[Job]) -> Optional[Job]:
+	#note: self is just spam
+	#self is not necessary
+	#but fit, fill expect self (state)
+	#=> when calling a scheduler, it might expect self
+	#would be nice, if you could check, wether or not function expects self, and only give if necessary
+	def fifo(self,q: List[Job]) -> Optional[Job]:
 		return min(q, key=lambda j: (j.queueingT, j.id)) if q else None
 
-	def lpt(q: List[Job]) -> Optional[Job]:
-		return max(q,key=lambda x: (x.processingT,j.id)) if q else None
+	def lpt(self,q: List[Job]) -> Optional[Job]:
+		return max(q,key=lambda j: (j.processingT,j.id)) if q else None
 
-	def spt(q: List[Job]) -> Optional[Job]:
-		return min(q,key=lambda x: (x.processingT,j.id)) if q else None
+	def spt(self,q: List[Job]) -> Optional[Job]:
+		return min(q,key=lambda j: (j.processingT,j.id)) if q else None
 
-	def random(q: List[Job]) -> Optional[Job]:
+	def random(sefl,q: List[Job]) -> Optional[Job]:
 		return random.choice(q) if q else None
+################higher Order
+	def fifo_fit(self,q:List[Job]) -> Optional[Job]:
+		return self.fit(self.fifo,q)
 
-	def fifo_fit(q:List[Job]) -> Optional[Job]:
-		return fit(fifo,q)
+	def fifo_backfill(self,q:List[Job])->Optional[Job]:
+		return self.backfilling(self.fifo,q)
 
-	def fifo_backfill(q:List[Job])->Optional[Job]:
-		return backfilling(fifo,q)
+	def lpt_fit(self,q:List[Job]) -> Optional[Job]:
+		return self.fit(self.lpt,q)
+
+	def lpt_backfill(self,q:List[Job])->Optional[Job]:
+		return self.backfilling(self.lpt,q)
+
+	def spt_fit(self,q:List[Job]) -> Optional[Job]:
+		return self.fit(self.spt,q)
+
+	def spt_backfill(self,q:List[Job])->Optional[Job]:
+		return self.backfilling(self.spt,q)
+
 	#dis nice, but name of function after workarround would be fit => fit of what?
 	#fifo_fit: Callable[[List[Job]],Optional[Job]] = wrapped_partial(fit,fifo)
 	#fifo_backfill: Callable[[List[Job]],Optional[Job]] = wrapped_partial(backfilling, fifo)
@@ -148,7 +168,7 @@ class System:
 		self.time += 1
 
 	def scheduleNextJob(self)->bool:
-		nextJob: Optional[Job] = self.scheduler(self.q)
+		nextJob: Optional[Job] = self.scheduler(self,self.q)
 		if nextJob is None or nextJob.degreeOP > len(self.nodesAvl):
 			return False
 		else:

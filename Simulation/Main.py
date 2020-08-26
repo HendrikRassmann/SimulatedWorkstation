@@ -63,18 +63,28 @@ def main():
 
 	#numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,minSeq: int, maxSeq: int ,minPar: int, maxPar: int)
 
-	schedulers = [Simulation.System.fifo]#, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
+	schedulers = [\
+		Simulation.System.fifo,\
+		Simulation.System.fifo_fit,\
+		Simulation.System.fifo_backfill,\
+		Simulation.System.lpt,\
+		Simulation.System.lpt_fit,\
+		Simulation.System.lpt_backfill,\
+		Simulation.System.spt,\
+		Simulation.System.spt_fit,\
+		Simulation.System.spt_backfill,\
+		]
 
 	numberOfIterations = list(range(1))
 	numberOfJobs = list(range(5,5 +1,10))
-	numberOfNodes = list(range(2,2 +1))
-	seqR = [1] #part of sequential jobs (between 0 and 1).
+	numberOfNodes = list(range(5,5 +1))
+	seqR = [0.5] #part of sequential jobs (between 0 and 1).
 	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = [0]# 0 <==> offline
 	minSeq = [5] #minimal processingT of sequential jobs
 	maxSeq = list(range(10,10+1, 10000))#[1000] #max processingT of sequential jobs
-	minPar = [100] #min processingT of parallel jobs
-	maxPar = [1000] #max processingT of parallel jobs
+	minPar = [30] #min processingT of parallel jobs
+	maxPar = [60] #max processingT of parallel jobs
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
@@ -97,6 +107,7 @@ def main():
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 				doneRuns += 1
 				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
+				print(sf.__name__)
 				print (Analysis.run2String(finishedJobs))
 
 	del dbConnector
