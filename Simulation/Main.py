@@ -7,29 +7,30 @@ python3 -m pytest
 '''TODO:
 
 	2DAY:
-	(O) different machine speed
-	
+
 	(O) false times
+	(0) refactor Schedulers to be nice (Agnostic to state (Nodes, Running, etc))
 	(0)-find flakeness (min/max)
-	
+
 	(O)-Testing!!!!!
 		#generator
 		#run
 		#backFilling
-	
-	(O)-non deterministic execution (4example: 
+
+	(O)-non deterministic execution (4example:
 		*finish,schedule,run in random sequence each second)
 		*tick random time (1..10)
 	(O)-find nice invariants to check
 	(O)-build state full testing in hypothesis (compare to vary input lists)
 
 	(O)-fix Random. once a job is choosen, it should stay choosen until it is started (Prob.)
-	
+
 	(O)-performance gains
 	(X)-add runs to Mongo DB, find BSON represantation
 	(X)-label axis, analysis selector comprehandable :D
 	(X)-find examples when one scheduler better than other
 	(X)-Draw some cool Graphs
+	(X) different machine speed
 '''
 import sys
 
@@ -54,16 +55,16 @@ import pprint
 
 #from collections import defaultdict
 
-def main():	
-	
+def main():
+
 	start: float = timeit.default_timer()
 
 	# graph: of gridsearch
-	
+
 	#numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,minSeq: int, maxSeq: int ,minPar: int, maxPar: int)
-	
-	schedulers = [Simulation.fifo]#, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
-	
+
+	schedulers = [Simulation.System.fifo]#, Simulation.lpt, Simulation.spt]#Simulation.firstFit ,Simulation.backfilling]
+
 	numberOfIterations = list(range(1))
 	numberOfJobs = list(range(5,5 +1,10))
 	numberOfNodes = list(range(2,2 +1))
@@ -74,7 +75,7 @@ def main():
 	maxSeq = list(range(10,10+1, 10000))#[1000] #max processingT of sequential jobs
 	minPar = [100] #min processingT of parallel jobs
 	maxPar = [1000] #max processingT of parallel jobs
-	
+
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
@@ -96,12 +97,12 @@ def main():
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 				doneRuns += 1
 				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
-				#print (Analysis.run2String(finishedJobs))
+				print (Analysis.run2String(finishedJobs))
 
 	del dbConnector
-	
+
 	stop = timeit.default_timer()
-	print('Time: ', stop - start) 
+	print('Time: ', stop - start)
 
 if __name__ == "__main__":
 	if len (sys.argv) == 0 or sys.argv[1] == "halp":
@@ -112,10 +113,10 @@ if __name__ == "__main__":
 		print ("now running stuff, maybe asking for arguments n stuff")
 		main()
 		sys.exit()
-		
+
 	if sys.argv[1] == "show":
 		Analysis.show()
-		
+
 	else :
 		print ("run with argument halp for help")
 		sys.exit()
