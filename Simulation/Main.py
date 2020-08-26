@@ -85,15 +85,18 @@ def main():
 	maxSeq = list(range(10,10+1, 10000))#[1000] #max processingT of sequential jobs
 	minPar = [30] #min processingT of parallel jobs
 	maxPar = [60] #max processingT of parallel jobs
+	errorRate = [0,1]
+	maxError = [1]
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
-	product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar)
+	product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar, errorRate, maxError)
 	numberOfRuns =\
 	 len(numberOfIterations)*len(numberOfJobs)*len(numberOfNodes)*\
 	 len(seqR)*len(largeR)*len(timespan)*len(minSeq)*len(maxSeq)*\
-	 len(minPar)*len(maxPar)*len(numberOfIterations)*len(schedulers)
+	 len(minPar)*len(maxPar)*len(numberOfIterations)*len(schedulers)*\
+	 len(errorRate)*len(maxError)
 	print (numberOfRuns)
 
 	for conf in product:#itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):

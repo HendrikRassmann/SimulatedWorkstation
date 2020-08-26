@@ -20,7 +20,7 @@ fixed = {
 
 
 def show():
-	
+
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
 	xAxis = "maxSeq"
@@ -34,7 +34,7 @@ def show():
 	docs = dbConnector.find(fixed)
 
 	for item in docs:
-		
+
 		for sf in schedulers:
 			xVaried = item["Params"][xAxis]
 			values = item["Evals"].get(sf)
@@ -46,12 +46,12 @@ def show():
 		#print (item)
 	#plot tse grapf!
 	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
-	
+
 	algoRep = {
 		"fifo":"+",
 		"spt":"x",
 		"lpt":"*"}
-	
+
 	for sf in schedulers:
 		lsf = list(map(list, zip(*sorted(sfXY[sf], key=lambda x:x[0]))))
 		print (lsf)
@@ -62,8 +62,8 @@ def show():
 		plt.ylabel(yAxis)
 	plt.legend()
 	plt.show()
-	
-	
+
+
 
 '''
 #all methods static
@@ -77,19 +77,19 @@ def makespan(jobs: List[Simulation.Job])->int:
 	firstEnter: int = min(jobs, key=lambda j : j.queueingT).queueingT
 	lastFinished: int = max(jobs, key=lambda j : j.completionT).completionT
 	return lastFinished - firstEnter
-	
+
 def flowTime(jobs: List[Simulation.Job])->int:
 	#how does this handle Nonde? idk
 	return sum(map(lambda j: (j.completionT - j.queueingT), jobs ) )
-	
+
 def avgFlowTime(jobs: List[Simulation.Job])->float:
 	return flowTime(jobs) / len(jobs)
-	
+
 def maximumLateness(jobs: List[Simulation.Job]) ->int:
 	return max(map(lambda j: j.startRunning - j.queueingT, jobs) )
-	
+
 def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
-	resultDict: Dict[str,Union[float,int]] = { 
+	resultDict: Dict[str,Union[float,int]] = {
 		"makespan": makespan(jobs),
   		"flowTime": flowTime(jobs),
   		"avgFlowTime": avgFlowTime(jobs),
@@ -103,15 +103,15 @@ def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
 	return resultDict
 
 def run2String(jobs: List[Simulation.Job])->str:
-	
+
 	#assumption: complete Run
 	#assumption: starts at 0
 	#assumption: 0 <= id < 10
 	lastCompletion: int = max(jobs,key=(lambda j:j.completionT)).completionT
-	
+
 	#legende:
 	#id,qtime,paral
-	legend: str = "".join(list(map(lambda j: "id: %d, queueingT: %d, processingTime: %d, degreeOfParallelism: %d\n" % (j.id, j.queueingT,j.processingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
+	legend: str = "".join(list(map(lambda j: "id: %d, queueingT: %d, processingTime: %d, realProcessingT: %d, degreeOfParallelism: %d\n" % (j.id, j.queueingT,j.processingT,j.realProcessingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
 	#nodes: #QTimes später
 	#start,end,id
 	nodesInRun: Dict[int,List[Tuple[int,int,int]]] = {}
@@ -121,7 +121,7 @@ def run2String(jobs: List[Simulation.Job])->str:
 				nodesInRun[n.id].append( (j.startRunning, j.completionT, j.id) )
 			else:
 				nodesInRun[n.id]=[(j.startRunning, j.completionT, j.id)]
-	
+
 	for l in nodesInRun:
 		nodesInRun[l].sort(key=lambda x:x[0]) #sorted by start
 	nodeStrings:Dict[int,str] = {}
@@ -132,8 +132,3 @@ def run2String(jobs: List[Simulation.Job])->str:
 		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
 
 	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
-
-		
-	
-	
-	
