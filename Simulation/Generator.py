@@ -40,7 +40,7 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError
 		queueingT= random.randint(0,timespan),\
 		processingT= pTime,\
 		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\
-		,realProcessingT = pTime*(1+ maxError*random.random()) if random.random() <= errorRate else pTime
+		,realProcessingT = round(pTime*(1+ maxError*random.random())) if random.random()  <= errorRate else pTime
 		  ))
 
 	random.shuffle(jobs)

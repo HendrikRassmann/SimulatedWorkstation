@@ -75,12 +75,12 @@ results get plottet
 def makespan(jobs: List[Simulation.Job])->int:
 	#how does this handle None? idk
 	firstEnter: int = min(jobs, key=lambda j : j.queueingT).queueingT
-	lastFinished: int = max(jobs, key=lambda j : j.completionT).completionT
+	lastFinished: int = max(jobs, key=lambda j : j.realCompletionT).realCompletionT
 	return lastFinished - firstEnter
 
 def flowTime(jobs: List[Simulation.Job])->int:
 	#how does this handle Nonde? idk
-	return sum(map(lambda j: (j.completionT - j.queueingT), jobs ) )
+	return sum(map(lambda j: (j.realCompletionT - j.queueingT), jobs ) )
 
 def avgFlowTime(jobs: List[Simulation.Job])->float:
 	return flowTime(jobs) / len(jobs)
@@ -107,7 +107,7 @@ def run2String(jobs: List[Simulation.Job])->str:
 	#assumption: complete Run
 	#assumption: starts at 0
 	#assumption: 0 <= id < 10
-	lastCompletion: int = max(jobs,key=(lambda j:j.completionT)).completionT
+	lastCompletion: int = max(jobs,key=(lambda j:j.realCompletionT)).realCompletionT
 
 	#legende:
 	#id,qtime,paral
@@ -118,15 +118,15 @@ def run2String(jobs: List[Simulation.Job])->str:
 	for j in jobs:
 		for n in j.runningOn:
 			if n.id in nodesInRun:
-				nodesInRun[n.id].append( (j.startRunning, j.completionT, j.id) )
+				nodesInRun[n.id].append( (j.startRunning, j.realCompletionT, j.id) )
 			else:
-				nodesInRun[n.id]=[(j.startRunning, j.completionT, j.id)]
+				nodesInRun[n.id]=[(j.startRunning, j.realCompletionT, j.id)]
 
 	for l in nodesInRun:
 		nodesInRun[l].sort(key=lambda x:x[0]) #sorted by start
 	nodeStrings:Dict[int,str] = {}
 	for l in nodesInRun:
-		nodeStrings[l]=['-']*lastCompletion
+		nodeStrings[l]=['-']*lastCompletion#how does last completion become float??
 		for j in nodesInRun[l]:
 			nodeStrings[l][j[0]:j[1]] = [str(j[2])]*(j[1]-j[0])
 		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
