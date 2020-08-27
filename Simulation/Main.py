@@ -75,17 +75,19 @@ def main():
 		Simulation.System.spt_backfill,\
 		]
 
-	numberOfIterations = list(range(1))
-	numberOfJobs = list(range(5,5 +1,10))
-	numberOfNodes = list(range(5,5 +1))
-	seqR = [0.5] #part of sequential jobs (between 0 and 1).
-	largeR = [1] #part of large jobs (50% of nodes or more) of Parallel jobs
-	timespan = [0]# 0 <==> offline
-	minSeq = [5] #minimal processingT of sequential jobs
-	maxSeq = list(range(10,10+1, 10000))#[1000] #max processingT of sequential jobs
-	minPar = [30] #min processingT of parallel jobs
-	maxPar = [60] #max processingT of parallel jobs
-	errorRate = [0,1]
+	numberOfIterations = list(range(10))
+
+	numberOfJobs = list(range(250,250 +1,10))
+	numberOfNodes = list(range(10,10 +1))
+	seqR = [1] #part of sequential jobs (between 0 and 1).
+	largeR = [0.5] #part of large jobs (50% of nodes or more) of Parallel jobs
+	timespan = list(range(0,10000+1,500))# 0 <==> offline
+	minSeq = [1000] #minimal processingT of sequential jobs
+	maxSeq = list(range(50000,50000+1, 10000))
+	#[1000] #max processingT of sequential jobs
+	minPar = [1000] #min processingT of parallel jobs
+	maxPar = [100000] #max processingT of parallel jobs
+	errorRate = [0]
 	maxError = [1]
 
 	dbConnector = DBConnector.DBConnector()
@@ -95,7 +97,7 @@ def main():
 	numberOfRuns =\
 	 len(numberOfIterations)*len(numberOfJobs)*len(numberOfNodes)*\
 	 len(seqR)*len(largeR)*len(timespan)*len(minSeq)*len(maxSeq)*\
-	 len(minPar)*len(maxPar)*len(numberOfIterations)*len(schedulers)*\
+	 len(minPar)*len(maxPar)*len(schedulers)*\
 	 len(errorRate)*len(maxError)
 	print (numberOfRuns)
 
@@ -110,8 +112,8 @@ def main():
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 				doneRuns += 1
 				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
-				print(sf.__name__)
-				print (Analysis.run2String(finishedJobs))
+				#print(sf.__name__)
+				#print (Analysis.run2String(finishedJobs))
 
 	del dbConnector
 

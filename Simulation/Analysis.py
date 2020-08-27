@@ -10,12 +10,15 @@ fixed = {
 	"Params.numberOfJobs" : 250,
 	"Params.numberOfNodes" : 10,
 	"Params.seqR" : 1,
-	#"Params.largeR" : 1,
-	"Params.timespan" : 0,
+	#"Params.largeR" : 0.5,
+	#"Params.timespan" : 0,
 	"Params.minSeq" : 1000,
-	#"Params.maxSeq" : 1000, vary
-	#"Params.minPar" : 100,
-	#"Params.maxPar" : 1000
+	"Params.maxSeq" : 50000,
+	#"Params.minPar" : 1000,
+	#"Params.maxPar" : 100000,
+	"Params.errorRate" : 0,
+	#"Params.maxError" : 1
+
 }
 
 
@@ -23,13 +26,22 @@ def show():
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "maxSeq"
+	xAxis = "timespan"
 	yAxis = "makespan"
-	schedulers = ["fifo","spt","lpt"]
+	schedulers = [
+		"fifo",
+		"fifo_fit",
+		"fifo_backfill",
+		"spt",
+		"spt_fit",
+		"spt_backfill",
+		"lpt",
+		"lpt_fit",
+		"lpt_backfill"
+	]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
 		##x,y list für jeden scheduler
-	print ("next: NewLine")
 	print (sfXY["fifo"])
 	docs = dbConnector.find(fixed)
 
@@ -48,9 +60,16 @@ def show():
 	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
 
 	algoRep = {
-		"fifo":"+",
-		"spt":"x",
-		"lpt":"*"}
+		"fifo":"^",
+		"fifo_fit":"<",
+		"fifo_backfill": ">",
+		"spt":"2",
+		"spt_fit":"3",
+		"spt_backfill":"4",
+		"lpt":"*",
+		"lpt_fit":"x",
+		"lpt_backfill":"X"
+	}
 
 	for sf in schedulers:
 		lsf = list(map(list, zip(*sorted(sfXY[sf], key=lambda x:x[0]))))
@@ -60,6 +79,7 @@ def show():
 		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
 		plt.xlabel(xAxis)
 		plt.ylabel(yAxis)
+	plt.ylim(ymin=0)
 	plt.legend()
 	plt.show()
 
@@ -95,11 +115,6 @@ def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
   		"avgFlowTime": avgFlowTime(jobs),
   		"maximumLateness": maximumLateness(jobs)
 	}
-	#print ("Standard Analysis")
-	#print ("makespan: %d", makespan(jobs) )
-	#print ("flowtime: %d", flowTime(jobs) )
-	#print ("avgflowtime: %d", avgFlowTime(jobs))
-	#print ("maximum lateness: %d", maximumLateness(jobs))
 	return resultDict
 
 def run2String(jobs: List[Simulation.Job])->str:

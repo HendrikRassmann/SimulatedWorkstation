@@ -2,15 +2,9 @@
 import random
 import math
 from typing import List, Optional, Callable, Tuple
-from functools import partial, update_wrapper
-
-def wrapped_partial(func, *args, **kwargs):
-    partial_func = partial(func, *args, **kwargs)
-    update_wrapper(partial_func, func)
-    return partial_func
 
 class Node:
-    def __init__(self, ID: int, speed: int=1)-> None:
+    def __init__(self, ID: int, speed: int=100)-> None:
         self.id = ID
         self.speed = speed
     def __str__(self):  # type: () -> str
@@ -123,13 +117,6 @@ class System:
     def spt_backfill(self,q:List[Job])->Optional[Job]:
         return self.backfilling(self.spt,q)
 
-    #dis nice, but name of function after workarround would be fit => fit of what?
-    #fifo_fit: Callable[[List[Job]],Optional[Job]] = wrapped_partial(fit,fifo)
-    #fifo_backfill: Callable[[List[Job]],Optional[Job]] = wrapped_partial(backfilling, fifo)
-
-
-
-
 
     def __init__(self,jobs: List[Job], nodesAvl: int, scheduler:\
     Callable[ [List[Job], List[Node], List[Job],int ], Optional[Tuple[Job, List[Node]]]  ] ) -> None:
@@ -168,7 +155,30 @@ class System:
         self.futureJobs = list(filter(lambda j : j.queueingT > self.time, self.futureJobs))
 
     def tick(self):
-        self.time += 1
+        nextQ: Optional[int] = None
+        nextC: Optional[int] = None
+        for j in self.futureJobs:
+            if nextQ is None:
+                nextQ = j.queueingT
+            else:
+                nextQ = min(nextQ, j.queueingT)
+
+        for j in self.running:
+            if nextQ is None:
+                nextQ = j.realCompletionT
+            else:
+                nextQ = min(nextQ, j.realCompletionT)
+
+        if nextQ is None and nextC is None:
+            self.time += 1 #error state
+        elif nextQ is None:
+            self.time = nextC
+        elif nextC is None:
+            self.time = nextQ
+        else:
+            self.time = min (nextQ, nextC)
+
+        #self.time += 1
 
     def scheduleNextJob(self)->bool:
         nextJob: Optional[Job] = self.scheduler(self,self.q)
@@ -180,8 +190,8 @@ class System:
             nextJob.startRunning = self.time
             nextJob.runningOn = self.nodesAvl[:nextJob.degreeOP]
             self.nodesAvl = self.nodesAvl[nextJob.degreeOP:]
-            nextJob.completionT = self.time + nextJob.processingT
-            nextJob.realCompletionT = self.time + nextJob.realProcessingT
+            nextJob.completionT = self.time + round(nextJob.processingT / sum(map(lambda j:j.speed, nextJob.runningOn))) #nodespeed
+            nextJob.realCompletionT = self.time + round(nextJob.realProcessingT / sum(map(lambda j:j.speed, nextJob.runningOn)))
             self.running.append(nextJob)
             return True
 
@@ -196,7 +206,5 @@ class System:
             while self.scheduleNextJob():
                 pass#this is dumb, but atom removes "useless" spaces while saving -> breakes the loop ;( -> pass)
             self.tick()
-        print (len(self.finished))#2 extra jobs in finished??
-        print (self.assertNumberOfJobs)
         assert len(self.finished) == self.assertNumberOfJobs
         return self.finished

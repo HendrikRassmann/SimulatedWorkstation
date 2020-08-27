@@ -46,5 +46,3 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError
 	random.shuffle(jobs)
 	assert len(jobs) == numberOfJobs
 	return jobs
-
-#print (*generate(100,5,0.5,0.5,1000,1,50,10,100))
