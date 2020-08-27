@@ -57,26 +57,12 @@ class System:
                     nodesFreeNow += r.degreeOP
                     time2runF = r.completionT
                 else:
-                    break #bug potential: what if multiple nodes get free at same time => more surplus than calculated!
+                    break
 
-        #teilweise nur eine gap größer 1000 im ganzen run!
-            #entweder: gap zu klein berechnet
-            #parameter falsch (aber rest richtig => unwahrscheinlich)
-        #print("qlen-filterL-gap(at least 1000)----------------------")
-        #print(len(q))
-
-'''
-Es oist: j.processingT / (sum( map(sorted(self.nodesAvl), lambda j:j.speed)[0:j.degreeOfParallelism])
-'''
-
-
-        #es werden nicht genug gestartet(berechnung falsch?)
-        filteredList: List[Job] = list(filter(lambda j: j.processingT <= time2runF - self.time ,q ) )#now fit
-        #print(len(filteredList))
-        if (time2runF - self.time >= 1000):
-             print(time2runF - self.time)
-        #filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time) ,q))
-        return f(filteredList)
+            self.nodesAvl.sort(key=lambda n: n.speed, reverse=True)
+            gap :int = time2runF - self.time
+            filteredList :List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl) and (j.processingT / sum(map(lambda n:n.speed, self.nodesAvl[0:j.degreeOP])) <= gap),q))
+            return f(filteredList)
 
 
     def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
@@ -108,11 +94,12 @@ Es oist: j.processingT / (sum( map(sorted(self.nodesAvl), lambda j:j.speed)[0:j.
     def fifo(self,q: List[Job]) -> Optional[Job]:
         return min(q, key=lambda j: (j.queueingT, j.id)) if q else None
 
+    #maybe they adjust 4 node speed here aswell?
     def lpt(self,q: List[Job]) -> Optional[Job]:
-        return max(q,key=lambda j: (j.processingT,j.id)) if q else None
+        return max(q,key=lambda j: (j.processingT/j.degreeOP,j.id)) if q else None #approx
 
     def spt(self,q: List[Job]) -> Optional[Job]:
-        return min(q,key=lambda j: (j.processingT,j.id)) if q else None
+        return min(q,key=lambda j: (j.processingT/j.degreeOP,j.id)) if q else None #approx
 
     def random(sefl,q: List[Job]) -> Optional[Job]:
         return random.choice(q) if q else None

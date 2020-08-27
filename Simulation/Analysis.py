@@ -26,7 +26,7 @@ def show():
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
 	xAxis = "seqR"
-	yAxis = "maximumLateness"
+	yAxis = "makespan"
 	schedulers = [
 		"fifo",
 		"fifo_fit",

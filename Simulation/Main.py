@@ -6,6 +6,8 @@ sudo Mongod : starts mongoDB
 python3 -m pytest
 '''
 
+#Maybe they dont shuffle ids?
+
 '''TODO:
 
 	2DAY:
@@ -81,7 +83,7 @@ def main():
 
 	numberOfJobs = list(range(250,250 +1,10))
 	numberOfNodes = list(range(10,10 +1))
-	seqR = list(np.arange(0.5, 1, 0.05)) #part of sequential jobs (between 0 and 1).
+	seqR = list(np.arange(0.2, 1, 0.05)) #part of sequential jobs (between 0 and 1).
 	largeR = [0.3] #part of large jobs (50% of nodes or more) of Parallel jobs
 	timespan = list(range(10000,10000+1,100))# 0 <==> offline
 	minSeq = [1000] #minimal processingT of sequential jobs
@@ -113,9 +115,10 @@ def main():
 				finishedJobs: List[Simulation.Job] = sys.run()
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 				doneRuns += 1
-				print ("%d Procent done" % (doneRuns/numberOfRuns*100))
+
 				#print(sf.__name__)
 				#print (Analysis.run2String(finishedJobs))
+		print ("%d Procent done" % (doneRuns/numberOfRuns*100))
 
 	del dbConnector
 
