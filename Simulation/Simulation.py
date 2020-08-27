@@ -64,7 +64,7 @@ class System:
                 else:
                     break #bug potential: what if multiple nodes get free at same time => more surplus than calculated!
 
-        filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time),q))
+        filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time) and j.degreeOP<= len(self.nodesAvl),q))
         return f(filteredList)
 
     def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
