@@ -16,6 +16,10 @@ def jobs100() -> List[Simulation.Job]:
 def generate(numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,
 minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError :int = 0)->List[Simulation.Job]:
 
+
+	#shuffle ids:
+	idList = list(range(numberOfJobs))
+	random.shuffle(idList)
 	#ids go seq, small par, big par
 	assert 0 <= errorRate <= 1
 	assert 0 <= maxError
@@ -36,7 +40,7 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError
 	#d: int, queueingT : int, processingT: int, degreeOP
 		pTime = random.randint(minSeq,maxSeq) if (i < seqR*numberOfJobs) else random.randint(minPar, maxPar)
 		jobs.append(Simulation.Job(\
-		id=i,\
+		id=idList.pop(0),\
 		queueingT= random.randint(0,timespan),\
 		processingT= pTime,\
 		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\

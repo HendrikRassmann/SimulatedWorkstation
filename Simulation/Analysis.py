@@ -9,16 +9,15 @@ import numpy as np
 fixed = {
 	"Params.numberOfJobs" : 250,
 	"Params.numberOfNodes" : 10,
-	"Params.seqR" : 1,
-	#"Params.largeR" : 0.5,
-	#"Params.timespan" : 0,
+	#"Params.seqR" : 1,
+	"Params.largeR" : 0.3,
+	"Params.timespan" : 10000,
 	"Params.minSeq" : 1000,
 	"Params.maxSeq" : 50000,
-	#"Params.minPar" : 1000,
-	#"Params.maxPar" : 100000,
+	"Params.minPar" : 10000,
+	"Params.maxPar" : 400000,
 	"Params.errorRate" : 0,
 	#"Params.maxError" : 1
-
 }
 
 
@@ -26,18 +25,18 @@ def show():
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "timespan"
-	yAxis = "makespan"
+	xAxis = "seqR"
+	yAxis = "maximumLateness"
 	schedulers = [
 		"fifo",
 		"fifo_fit",
 		"fifo_backfill",
 		"spt",
-		"spt_fit",
-		"spt_backfill",
+		#"spt_fit",
+		#"spt_backfill",
 		"lpt",
-		"lpt_fit",
-		"lpt_backfill"
+		#"lpt_fit",
+		#"lpt_backfill"
 	]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
@@ -147,3 +146,18 @@ def run2String(jobs: List[Simulation.Job])->str:
 		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
 
 	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
+'''Figure 2
+fixed = {
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : 10,
+	"Params.seqR" : 1,
+	#"Params.largeR" : 0.5,
+	#"Params.timespan" : 0,
+	"Params.minSeq" : 1000,
+	"Params.maxSeq" : 50000,
+	#"Params.minPar" : 1000,
+	#"Params.maxPar" : 100000,
+	"Params.errorRate" : 0,
+	#"Params.maxError" : 1
+}
+'''

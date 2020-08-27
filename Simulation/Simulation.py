@@ -44,8 +44,9 @@ class System:
         fPick: Optional[Job] = f(q)
         if fPick is None:
             return None #q empty
-        if len(self.nodesAvl) >= fPick.degreeOP:
-            return fPick
+        if len(self.nodesAvl) >= fPick.degreeOP:#job can be started
+            #print(len(self.nodesAvl)) #immer 10 ?
+            return fPick#start it
         else:
             nodesNeeded: int = fPick.degreeOP
             nodesFreeNow: int = len(self.nodesAvl)
@@ -58,8 +59,25 @@ class System:
                 else:
                     break #bug potential: what if multiple nodes get free at same time => more surplus than calculated!
 
-        filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time) and j.degreeOP<= len(self.nodesAvl),q))
+        #teilweise nur eine gap größer 1000 im ganzen run!
+            #entweder: gap zu klein berechnet
+            #parameter falsch (aber rest richtig => unwahrscheinlich)
+        #print("qlen-filterL-gap(at least 1000)----------------------")
+        #print(len(q))
+
+'''
+Es oist: j.processingT / (sum( map(sorted(self.nodesAvl), lambda j:j.speed)[0:j.degreeOfParallelism])
+'''
+
+
+        #es werden nicht genug gestartet(berechnung falsch?)
+        filteredList: List[Job] = list(filter(lambda j: j.processingT <= time2runF - self.time ,q ) )#now fit
+        #print(len(filteredList))
+        if (time2runF - self.time >= 1000):
+             print(time2runF - self.time)
+        #filteredList: List[Job] = list(filter(lambda j:j.processingT <= (time2runF - self.time) ,q))
         return f(filteredList)
+
 
     def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
         fPick: Optional[Job] = f(self,q)
