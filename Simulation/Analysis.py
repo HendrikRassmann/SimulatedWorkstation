@@ -6,31 +6,22 @@ from typing import cast, List, Union, Optional, Callable, Tuple, Text, TypeVar, 
 import matplotlib.pyplot as plt
 import numpy as np
 
-fixed = {
-	"Params.numberOfJobs" : 250,
-	"Params.numberOfNodes" : 10,
-	#"Params.seqR" : 1,
-	"Params.largeR" : 0.3,
-	"Params.timespan" : 10000,
-	"Params.minSeq" : 1000,
-	"Params.maxSeq" : 50000,
-	"Params.minPar" : 10000,
-	"Params.maxPar" : 400000,
-	"Params.errorRate" : 0,
-	#"Params.maxError" : 1
-}
+
+
 
 
 def show():
 
+	fixed = figure_2
+
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "seqR"
+	xAxis = "timespan"
 	yAxis = "makespan"
 	schedulers = [
 		"fifo",
-		"fifo_fit",
-		"fifo_backfill",
+		#"fifo_fit",
+		#"fifo_backfill",
 		"spt",
 		#"spt_fit",
 		#"spt_backfill",
@@ -54,9 +45,6 @@ def show():
 				yAvg = sum(map (lambda x: x[yAxis], (item["Evals"][sf]) ) ) / numberOfValues
 				sfXY[sf].append((xVaried,yAvg))
 				print (xVaried,yAvg)
-		#print (item)
-	#plot tse grapf!
-	#map(list, zip(*[(1, 2), (3, 4), (5, 6)]))
 
 	algoRep = {
 		"fifo":"^",
@@ -146,18 +134,30 @@ def run2String(jobs: List[Simulation.Job])->str:
 		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
 
 	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
-'''Figure 2
-fixed = {
+
+figure_1 = {
 	"Params.numberOfJobs" : 250,
 	"Params.numberOfNodes" : 10,
 	"Params.seqR" : 1,
-	#"Params.largeR" : 0.5,
-	#"Params.timespan" : 0,
+	"Params.largeR" : 0,
+	"Params.timespan" : 0,
+	"Params.minSeq" : 1000,
+	#"Params.maxSeq" : [list(range())100000],
+	#"Params.minPar" : [0],
+	#"Params.maxPar" : [0],
+	"Params.errorRate" : 0
+	#"Params.maxError" : [0]
+}
+figure_2 = {
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : 10,
+	"Params.seqR" : 1,
+	"Params.largeR" : 0,
+	#"Params.timespan" : list(range(0,10000+1, 200)),
 	"Params.minSeq" : 1000,
 	"Params.maxSeq" : 50000,
-	#"Params.minPar" : 1000,
-	#"Params.maxPar" : 100000,
-	"Params.errorRate" : 0,
-	#"Params.maxError" : 1
+	#"Params.minPar" : [0],
+	#"Params.maxPar" : [0],
+	"Params.errorRate" : 0
+	#"Params.maxError" : 0
 }
-'''

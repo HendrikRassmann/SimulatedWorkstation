@@ -1,12 +1,13 @@
+
+
 '''
 python 3.6
 sudo Mongod : starts mongoDB
+$: mongo opens mongoshell in terminal
 --use pastRunns
 --db.run1.drop()
 python3 -m pytest
 '''
-
-#Maybe they dont shuffle ids?
 
 '''TODO:
 
@@ -46,6 +47,8 @@ import DBConnector
 from typing import cast, List, Optional, Callable, Tuple, Text, TypeVar, Generic, Type
 
 import itertools
+import functools
+import operator
 
 import timeit
 
@@ -55,6 +58,8 @@ import numpy as np
 import pymongo
 from pymongo import MongoClient
 import pprint
+
+import math
 
 
 #from collections import defaultdict
@@ -69,42 +74,29 @@ def main():
 
 	schedulers = [\
 		Simulation.System.fifo,\
-		Simulation.System.fifo_fit,\
-		Simulation.System.fifo_backfill,\
+		#Simulation.System.fifo_fit,\
+		#Simulation.System.fifo_backfill,\
 		Simulation.System.lpt,\
-		Simulation.System.lpt_fit,\
-		Simulation.System.lpt_backfill,\
+		#Simulation.System.lpt_fit,\
+		#Simulation.System.lpt_backfill,\
 		Simulation.System.spt,\
-		Simulation.System.spt_fit,\
-		Simulation.System.spt_backfill,\
+		#Simulation.System.spt_fit,\
+		#Simulation.System.spt_backfill,\
 		]
 
 	numberOfIterations = list(range(5))
 
-	numberOfJobs = list(range(250,250 +1,10))
-	numberOfNodes = list(range(10,10 +1))
-	seqR = list(np.arange(0.2, 1, 0.05)) #part of sequential jobs (between 0 and 1).
-	largeR = [0.3] #part of large jobs (50% of nodes or more) of Parallel jobs
-	timespan = list(range(10000,10000+1,100))# 0 <==> offline
-	minSeq = [1000] #minimal processingT of sequential jobs
-	maxSeq = list(range(50000,50000+1, 10000))
-	#[1000] #max processingT of sequential jobs
-	minPar = [10000] #min processingT of parallel jobs
-	maxPar = list(range(400000,400000+1, 10000)) #max processingT of parallel jobs
-	errorRate = [0]
-	maxError = [1]
-
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
-	product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar, errorRate, maxError)
-	numberOfRuns =\
-	 len(numberOfIterations)*len(numberOfJobs)*len(numberOfNodes)*\
-	 len(seqR)*len(largeR)*len(timespan)*len(minSeq)*len(maxSeq)*\
-	 len(minPar)*len(maxPar)*len(schedulers)*\
-	 len(errorRate)*len(maxError)
-	print (numberOfRuns)
 
+	experiment = figure_2
+
+	product = itertools.product( *experiment.values())
+	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
+	#product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar, errorRate, maxError)
+
+	runCounter = 0
 	for conf in product:#itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
 
 		for i in numberOfIterations:
@@ -114,16 +106,47 @@ def main():
 				sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
-				doneRuns += 1
 
-				#print(sf.__name__)
-				#print (Analysis.run2String(finishedJobs))
-		print ("%d Procent done" % (doneRuns/numberOfRuns*100))
+		runCounter+=1
+		print(runCounter/numberOfRuns)
 
 	del dbConnector
 
 	stop = timeit.default_timer()
 	print('Time: ', stop - start)
+
+
+
+def show():
+	pass
+	#talk to db
+	#plot what you want
+figure_1 = {
+	"numberOfJobs" : [250],
+	"numberOfNodes" : [10],
+	"seqR" : [1],
+	"largeR" : [0],
+	"timespan" : [0],
+	"minSeq" : [1000],
+	"maxSeq" : list(range(1000,100000+1, 2000)),
+	"minPar" : [0],
+	"maxPar" : [0],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+figure_2 = {
+	"numberOfJobs" : [250],
+	"numberOfNodes" : [10],
+	"seqR" : [1],
+	"largeR" : [0],
+	"timespan" : list(range(0,10000+1, 200)),
+	"minSeq" : [1000],
+	"maxSeq" : [50000],
+	"minPar" : [0],
+	"maxPar" : [0],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
 
 if __name__ == "__main__":
 	if len (sys.argv) == 0 or sys.argv[1] == "halp":
@@ -141,8 +164,3 @@ if __name__ == "__main__":
 	else :
 		print ("run with argument halp for help")
 		sys.exit()
-
-def show():
-	pass
-	#talk to db
-	#plot what you want
