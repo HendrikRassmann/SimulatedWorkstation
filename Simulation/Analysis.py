@@ -12,16 +12,16 @@ import numpy as np
 
 def show():
 
-	fixed = figure_2
+	fixed = figure_3
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "timespan"
-	yAxis = "makespan"
+	xAxis = "seqR"
+	yAxis = "maximumLateness"
 	schedulers = [
 		"fifo",
-		#"fifo_fit",
-		#"fifo_backfill",
+		"fifo_fit",
+		"fifo_backfill",
 		"spt",
 		#"spt_fit",
 		#"spt_backfill",
@@ -32,7 +32,6 @@ def show():
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
 		##x,y list für jeden scheduler
-	print (sfXY["fifo"])
 	docs = dbConnector.find(fixed)
 
 	for item in docs:
@@ -159,5 +158,18 @@ figure_2 = {
 	#"Params.minPar" : [0],
 	#"Params.maxPar" : [0],
 	"Params.errorRate" : 0
+	#"Params.maxError" : 0
+}
+figure_3 = {
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : 10,
+	#"Params.seqR" : list(map (lambda x: x/100), range(20,100+1, 4))
+	"Params.largeR" : 0.3,
+	"Params.timespan" : 10000,
+	"Params.minSeq" : 1000,
+	"Params.maxSeq" : 50000,
+	"Params.minPar" : 10000,
+	"Params.maxPar" : 400000,
+	"Params.errorRate" : 0,
 	#"Params.maxError" : 0
 }

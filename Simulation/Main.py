@@ -68,14 +68,11 @@ def main():
 
 	start: float = timeit.default_timer()
 
-	# graph: of gridsearch
-
-	#numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,minSeq: int, maxSeq: int ,minPar: int, maxPar: int)
 
 	schedulers = [\
 		Simulation.System.fifo,\
-		#Simulation.System.fifo_fit,\
-		#Simulation.System.fifo_backfill,\
+		Simulation.System.fifo_fit,\
+		Simulation.System.fifo_backfill,\
 		Simulation.System.lpt,\
 		#Simulation.System.lpt_fit,\
 		#Simulation.System.lpt_backfill,\
@@ -84,13 +81,13 @@ def main():
 		#Simulation.System.spt_backfill,\
 		]
 
-	numberOfIterations = list(range(5))
+	numberOfIterations = list(range(50))
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_2
+	experiment = figure_3
 
 	product = itertools.product( *experiment.values())
 	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
@@ -144,6 +141,19 @@ figure_2 = {
 	"maxSeq" : [50000],
 	"minPar" : [0],
 	"maxPar" : [0],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+figure_3 = {
+	"numberOfJobs" : [250],
+	"numberOfNodes" : [10],
+	"seqR" :  [ x/100 for x in range(20,101, 4)],
+	"largeR" : [0.3],
+	"timespan" : [10000],
+	"minSeq" : [1000],
+	"maxSeq" : [50000],
+	"minPar" : [10000],
+	"maxPar" : [400000],
 	"errorRate" : [0],
 	"maxError" : [0]
 }
