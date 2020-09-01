@@ -13,8 +13,6 @@ python3 -m pytest
 
 	2DAY:
 
-	(O) false times
-	(0) refactor Schedulers to be nice (Agnostic to state (Nodes, Running, etc))
 	(0)-find flakeness (min/max)
 
 	(O)-Testing!!!!!
@@ -28,9 +26,10 @@ python3 -m pytest
 	(O)-find nice invariants to check
 	(O)-build state full testing in hypothesis (compare to vary input lists)
 
-	(O)-fix Random. once a job is choosen, it should stay choosen until it is started (Prob.)
-
-	(O)-performance gains
+	# Fuck Random (O)-fix Random. once a job is choosen, it should stay choosen until it is started (Prob.)
+	(X) refactor Schedulers to be nice (Agnostic to state (Nodes, Running, etc)) #but !this! sucks
+	(X) false times
+	(X)-performance gains
 	(X)-add runs to Mongo DB, find BSON represantation
 	(X)-label axis, analysis selector comprehandable :D
 	(X)-find examples when one scheduler better than other
@@ -81,13 +80,13 @@ def main():
 		#Simulation.System.spt_backfill,\
 		]
 
-	numberOfIterations = list(range(50))
+	numberOfIterations = list(range(5))
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_3
+	experiment = figure_4
 
 	product = itertools.product( *experiment.values())
 	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
@@ -99,7 +98,6 @@ def main():
 		for i in numberOfIterations:
 			jobs: List[Simulation.Job] = Generator.generate(*conf)
 			for sf in schedulers:
-
 				sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
@@ -120,7 +118,7 @@ def show():
 	#plot what you want
 figure_1 = {
 	"numberOfJobs" : [250],
-	"numberOfNodes" : [10],
+	"numberOfNodes" : [[100,100,100,100,100,100,100,100,100,100]],
 	"seqR" : [1],
 	"largeR" : [0],
 	"timespan" : [0],
@@ -133,7 +131,7 @@ figure_1 = {
 }
 figure_2 = {
 	"numberOfJobs" : [250],
-	"numberOfNodes" : [10],
+	"numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
 	"seqR" : [1],
 	"largeR" : [0],
 	"timespan" : list(range(0,10000+1, 200)),
@@ -146,7 +144,7 @@ figure_2 = {
 }
 figure_3 = {
 	"numberOfJobs" : [250],
-	"numberOfNodes" : [10],
+	"numberOfNodes" : [[100,100,100,100,100,100,100,100,100,100]],
 	"seqR" :  [ x/100 for x in range(20,101, 4)],
 	"largeR" : [0.3],
 	"timespan" : [10000],
@@ -154,6 +152,20 @@ figure_3 = {
 	"maxSeq" : [50000],
 	"minPar" : [10000],
 	"maxPar" : [400000],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+slowerR = 0.75
+figure_4 = {
+	"numberOfJobs" : [500],
+	"numberOfNodes" : [[ 666 if x/21 < slowerR else 4700 for x in range (22)]],
+	"seqR" :  [ x/100 for x in range(50,101, 25)],
+	"largeR" : [0.3],
+	"timespan" : [2000],
+	"minSeq" : [2000],
+	"maxSeq" : [100000],
+	"minPar" : [20000],
+	"maxPar" : [800000],
 	"errorRate" : [0],
 	"maxError" : [0]
 }

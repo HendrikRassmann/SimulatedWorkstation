@@ -12,12 +12,12 @@ import numpy as np
 
 def show():
 
-	fixed = figure_3
+	fixed = figure_4
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
 	xAxis = "seqR"
-	yAxis = "maximumLateness"
+	yAxis = "makespan"
 	schedulers = [
 		"fifo",
 		"fifo_fit",
@@ -136,7 +136,7 @@ def run2String(jobs: List[Simulation.Job])->str:
 
 figure_1 = {
 	"Params.numberOfJobs" : 250,
-	"Params.numberOfNodes" : 10,
+	"Params.numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
 	"Params.seqR" : 1,
 	"Params.largeR" : 0,
 	"Params.timespan" : 0,
@@ -149,7 +149,7 @@ figure_1 = {
 }
 figure_2 = {
 	"Params.numberOfJobs" : 250,
-	"Params.numberOfNodes" : 10,
+	"Params.numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
 	"Params.seqR" : 1,
 	"Params.largeR" : 0,
 	#"Params.timespan" : list(range(0,10000+1, 200)),
@@ -162,7 +162,7 @@ figure_2 = {
 }
 figure_3 = {
 	"Params.numberOfJobs" : 250,
-	"Params.numberOfNodes" : 10,
+	"Params.numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
 	#"Params.seqR" : list(map (lambda x: x/100), range(20,100+1, 4))
 	"Params.largeR" : 0.3,
 	"Params.timespan" : 10000,
@@ -172,4 +172,17 @@ figure_3 = {
 	"Params.maxPar" : 400000,
 	"Params.errorRate" : 0,
 	#"Params.maxError" : 0
+}
+figure_4 = {
+	"Params.numberOfJobs" : 500,
+	#"Params.numberOfNodes" : [100 for x in range (22)],
+	#"Params.seqR" :  [ x/100 for x in range(50,101, 4)],
+	"Params.largeR" : 0.3,
+	"Params.timespan" : 2000,
+	"Params.minSeq" : 2000,
+	"Params.maxSeq" : 100000,
+	"Params.minPar" : 20000,
+	"Params.maxPar" : 800000,
+	"Params.errorRate" : 0,
+	#"Params.maxError" : [0]
 }

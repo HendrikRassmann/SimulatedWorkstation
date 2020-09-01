@@ -13,7 +13,7 @@ def jobs100() -> List[Simulation.Job]:
 
 
 
-def generate(numberOfJobs: int, numberOfNodes: int, seqR: float, largeR: float, timespan: int,
+def generate(numberOfJobs: int, numberOfNodes: List[int], seqR: float, largeR: float, timespan: int,
 minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError :int = 0)->List[Simulation.Job]:
 
 
@@ -24,7 +24,7 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError
 	assert 0 <= errorRate <= 1
 	assert 0 <= maxError
 	assert numberOfJobs >= 1
-	assert numberOfNodes >= 1
+	assert len(numberOfNodes) >= 1
 	assert 0 <= seqR <= 1
 	assert 0 <= largeR <= 1
 	assert timespan >= 0
@@ -43,7 +43,7 @@ minSeq: int, maxSeq: int ,minPar: int, maxPar: int, errorRate :int = 0, maxError
 		id=idList.pop(0),\
 		queueingT= random.randint(0,timespan),\
 		processingT= pTime,\
-		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,numberOfNodes//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (numberOfNodes+1)//2, numberOfNodes) ))\
+		degreeOP= 1 if (i < seqR*numberOfJobs) else (random.randint(2,len(numberOfNodes)//2) if i < (numberOfJobs*(1 - largeR + seqR*largeR)) else (random.randint( (len(numberOfNodes)+1)//2, len(numberOfNodes)) ))\
 		,realProcessingT = round(pTime*(1+ maxError*random.random())) if random.random()  <= errorRate else pTime
 		  ))
 

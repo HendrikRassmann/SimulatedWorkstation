@@ -5,9 +5,9 @@ def nice (tupJobsNodes):
 	jobIDs = list(range(0,nrJobs))
 	for j in jobList:
 		j.id = jobIDs.pop()
-	
+
 	return lambda scheduler: Simulation.System(jobList.copy(),nrNodes,scheduler)
-	
+
 
 
 from hypothesis import given, settings, note, strategies as st
@@ -46,7 +46,7 @@ generate_queueingTime_small,\
 generate_runtime_small,\
 generate_nodes2run_small)
 
-#here important to work, 
+#here important to work,
 def generate_job_params(maxNodes, maxRuntime, maxQT):
 	return builds(Simulation.Job,\
 	 st.integers(0,0),\
@@ -60,10 +60,10 @@ def generate_System_and_Jobs(maxNodes, maxNumberOfJobs, maxRuntime, maxQT):#give
 	ids = list(range(0,maxNumberOfJobs))
 	return st.integers(1,maxNodes).flatmap(lambda x:\
 		st.tuples(st.lists(generate_job_params(x,maxRuntime,maxQT),min_size=2,max_size=maxNumberOfJobs), st.integers(x,x)) ).map(nice)
-	
+
 generate_list_jobs_small = st.lists(generate_job_small, min_size=2, max_size=5, unique_by=(lambda x: x.queueingT) )
 
-generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )  
+generate_list_nodes = st.lists(generate_node, min_size=0, max_size=50 )
 
 #####################
 # Testing Schedulers#
@@ -81,28 +81,28 @@ def test_backfilling(q):
 	#small list has id 0
 	sysFiFo: Simulation.System = Simulation.System(q.copy(),5,Simulation.fifo)
 	sysBackfilling: Simulation.System = Simulation.System(q.copy(),5,Simulation.backfilling)
-	
+
 	fifoTrace = sysFiFo.run()
 	backfillingTrace = sysBackfilling.run()
-	
+
 	fifoTraceStart = sorted(list(map(lambda j: j.startRunning, fifoTrace )))
 	backfillingTraceStart = sorted(list(map(lambda j: j.startRunning,backfillingTrace )))
-	
+
 	note("".join(map(str,q)) )
 	note("#OfNodes: "+str(5) )
-	
+
 	note("fifoTrace:")
 	note("".join(map(str,fifoTrace)))
 	note("backfillingTrace:")
 	note("".join(map(str,backfillingTrace)))
-	
+
 	for f,b in zip(fifoTraceStart, backfillingTraceStart):
 		assert b <= f
 	'''
 	#fifoRun = list(map(lambda j: j.startRunning, sysFiFo.run())).sort()#
 	print(len(fifoRun))
 	backfillingRun = list(map(lambda j: j.startRunning, sysBackfilling.run())).sort()
-	
+
 	print(len(fifoRun))
 	for f,b in zip(fifoRun,backfillingRun):#len 0?
 		assert b.queueingT <= f.queueingT'''
@@ -113,7 +113,7 @@ def test_random(q,n):
 	nextJob = Simulation.rand(q,n)
 	if not (q and n): assert nextJob is None
 	else:
-		if nextJob is not None: 
+		if nextJob is not None:
 			assert nextJob[0] in q
 			for node in nextJob[1]: assert node in n
 		else:
@@ -126,19 +126,19 @@ def test_lpt(q,n):
 	# found one -> no other job longer
 	# none	-> either no job runnable
 	#	-> or one of the longest not runnable
-	
+
 	nextJob = Simulation.lpt(q,n)
 
 	#q or nodes empty
 	if not (q and n):
 		assert nextJob is None
-	else:	
+	else:
 		if nextJob is None: #only runs the longest job
 
-			maxPT = max( map(lambda j: j.processingT,q) ) #max processingT in q			
+			maxPT = max( map(lambda j: j.processingT,q) ) #max processingT in q
 			nodesAvl = len(n)
 			assert max(filter(lambda j: j.processingT == maxPT, q), key=lambda j: j.degreeOP).degreeOP > nodesAvl
-						
+
 		else:
 			for j in q: assert j.processingT <= nextJob[0].processingT
 
@@ -150,13 +150,13 @@ def test_spt(q,n):
 	#q or nodes empty
 	if not (q and n):
 		assert nextJob is None
-	else:	
+	else:
 		if nextJob is None: #only runs the longest job
 
-			minPT = min( map(lambda j: j.processingT,q) ) #max processingT in q			
+			minPT = min( map(lambda j: j.processingT,q) ) #max processingT in q
 			nodesAvl = len(n)
 			assert max(filter(lambda j: j.processingT == minPT, q), key=lambda j: j.degreeOP).degreeOP > nodesAvl#fails
-						
+
 		else:
 			for j in q: assert j.processingT >= nextJob[0].processingT
 
@@ -171,20 +171,20 @@ def test_fifo_unit():
 	twoJob = Simulation.Job(2,2,2,2)
 	threeJob = Simulation.Job(3,3,3,3)
 	forOneJob = Simulation.Job(4,1,4,4)
-	
-	assert Simulation.fifo(emptyJobList, tenPool) == None	
+
+	assert Simulation.fifo(emptyJobList, tenPool) == None
 	assert Simulation.fifo([threeJob], emptyNodeList) == None
-	assert Simulation.fifo(emptyJobList, emptyNodeList) == None	
-	
+	assert Simulation.fifo(emptyJobList, emptyNodeList) == None
+
 	pair1 = Simulation.fifo([oneJob],onePool)
 	assert pair1[0] == oneJob and pair1[1] == onePool
-	
+
 	pair2 = Simulation.fifo([twoJob, oneJob], [1])
 	assert pair2[0] == oneJob and pair2[1] == [1]
-	
+
 	pair3 = Simulation.fifo([twoJob, threeJob], twoPool) # 3 :two many nodes
 	assert pair3[0] == twoJob and (pair3[1] == [1,2] or pair3[1] == [2,1])
-	
+
 	pair4 = Simulation.fifo([forOneJob, twoJob],twoPool)
 	assert pair4 == None
 
@@ -200,12 +200,12 @@ def test_firstFit_unit():
 	twoJob = Simulation.Job(2,2,2,2)
 	threeJob = Simulation.Job(3,3,3,3)
 	forOneJob = Simulation.Job(4,1,4,4)
-	
-	assert Simulation.firstFit(emptyJobList, tenPool) == None	
+
+	assert Simulation.firstFit(emptyJobList, tenPool) == None
 	assert Simulation.firstFit([threeJob], emptyNodeList) == None
 	assert Simulation.firstFit(emptyJobList, emptyNodeList) == None
-	
-	pair1 = Simulation.firstFit([threeJob,forOneJob], onePool) 
+
+	pair1 = Simulation.firstFit([threeJob,forOneJob], onePool)
 	assert pair1 == None
 	pair2 = Simulation.firstFit([forOneJob, threeJob], tenPool)
 	assert pair2[0] == forOneJob
@@ -213,7 +213,7 @@ def test_firstFit_unit():
 @given(st.integers(), st.integers())
 def test_firstFit(q,nodes):
 	assert True
-	
+
 
 @given(generate_list_jobs, generate_list_nodes)
 def test_fifo(q,nodes):
@@ -227,7 +227,7 @@ def test_ffEQfifo_allRunnable(q):
 	nodes1k = list(map(Simulation.Node, list(range(50)) ) )#should be max nodes needed
 	assert Simulation.fifo(q, nodes1k) == Simulation.firstFit(q, nodes1k)
 	#doesnt have to be, you know, there might be many right answers
-	
+
 ### lets do some statefull testing next
 
 ###
@@ -239,7 +239,7 @@ def test_whenFiFoFirstFitFlowTime(listANDnodes):
 	sysFiFo: Simulation.System = listANDnodes(Simulation.fifo)
 	sysFirstFit: Simulation.System = listANDnodes(Simulation.firstFit)
 
-	
+
 	fifoRun = sysFiFo.run()
 	flowTimeFifo =  Analysis.makespan(fifoRun)
 	note(flowTimeFifo)
@@ -250,4 +250,4 @@ def test_whenFiFoFirstFitFlowTime(listANDnodes):
 	note(flowTimeFirstFit)
 	note(Analysis.run2String(fifoRun))
 	note("XXXXXXXXXXXXXXXXXXXXXXXXXXX")
-	assert flowTimeFifo <= flowTimeFirstFit 
+	assert flowTimeFifo <= flowTimeFirstFit

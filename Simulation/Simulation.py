@@ -123,19 +123,19 @@ class System:
         return self.backfilling(self.spt,q)
 
 
-    def __init__(self,jobs: List[Job], nodesAvl: int, scheduler:\
+    def __init__(self,jobs: List[Job], nodesAvl: List[int], scheduler:\
     Callable[ [List[Job], List[Node], List[Job],int ], Optional[Tuple[Job, List[Node]]]  ] ) -> None:
 
 
         #online, finished list inside System or reference?
 
         #list nodes with name 0..n(odess)
-        self.assertNodes = nodesAvl
+        self.assertNodes = len(nodesAvl)
         self.assertNumberOfJobs = len(jobs)
         self.time: int = 0
         self.nodesAvl: List[Node] = [] #("free nodes")
-        for i in range(nodesAvl):
-            self.nodesAvl.append(Node(i)) #all nodes speed 1
+        for i in range(len(nodesAvl)):
+            self.nodesAvl.append(Node(i,nodesAvl[i])) #all nodes speed 1
         #scheduling function
         self.scheduler = scheduler
         #Job q
