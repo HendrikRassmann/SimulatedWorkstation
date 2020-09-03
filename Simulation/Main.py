@@ -73,11 +73,12 @@ def main():
 		Simulation.System.fifo_fit,\
 		Simulation.System.fifo_backfill,\
 		Simulation.System.lpt,\
-		#Simulation.System.lpt_fit,\
-		#Simulation.System.lpt_backfill,\
-		Simulation.System.spt\
-		#Simulation.System.spt_fit,\
-		#Simulation.System.spt_backfill,\
+		Simulation.System.lpt_fit,\
+		Simulation.System.lpt_backfill,\
+		Simulation.System.spt,\
+		Simulation.System.spt_fit,\
+		Simulation.System.spt_backfill,\
+		Simulation.System.fifo_optimistic
 		]
 
 	numberOfIterations = list(range(5))
@@ -86,7 +87,7 @@ def main():
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_5
+	experiment = figure_8
 
 	product = itertools.product( *experiment.values())
 	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
@@ -163,8 +164,9 @@ slowerR = 0.75
 
 figure_5 = {
 	"numberOfJobs" : [500],
-	"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
-	"seqR" :  [ x/100 for x in range(50, 81, 2)],
+	#"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"numberOfNodes" : [[275 if (x+1)/100 < 0.75 else 825 for x in range (100)]],
+	"seqR" :  [ x/100 for x in range(82, 101, 2)],
 	"largeR" : [0.3],
 	"timespan" : [2000],
 	"minSeq" : [2000],
@@ -173,6 +175,60 @@ figure_5 = {
 	"maxPar" : [800000],
 	"errorRate" : [0],
 	"maxError" : [0]
+}
+figure_4 = {
+	"numberOfJobs" : [250],
+	#"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
+	"seqR" :  [ x/100 for x in range(50, 101, 2)],
+	"largeR" : [0.3],
+	"timespan" : [4000],
+	"minSeq" : [2000],
+	"maxSeq" : [100000],
+	"minPar" : [20000],
+	"maxPar" : [800000],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+figure_6 = {
+	"numberOfJobs" : [250],
+	#"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
+	"seqR" :  [0.7],
+	"largeR" : [x/100 for x in range(0, 101,2)],
+	"timespan" : [3500],
+	"minSeq" : [2000],
+	"maxSeq" : [100000],
+	"minPar" : [20000],
+	"maxPar" : [800000],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+figure_7 = {
+	"numberOfJobs" : [250],
+	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
+	"seqR" :  [0.7],
+	"largeR" : [0.3],
+	"timespan" : [x for x in range (2000,8000+1, 100)],
+	"minSeq" : [2000],
+	"maxSeq" : [100000],
+	"minPar" : [20000],
+	"maxPar" : [800000],
+	"errorRate" : [0],
+	"maxError" : [0]
+}
+figure_8 = {
+	"numberOfJobs" : [250],
+	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
+	"seqR" :  [0.7],
+	"largeR" : [0.3],
+	"timespan" : [4000],
+	"minSeq" : [2000],
+	"maxSeq" : [100000],
+	"minPar" : [20000],
+	"maxPar" : [800000],
+	"errorRate" : [1],
+	"maxError" : [ [x/100 for x in range(0,501,20) ] ]
 }
 
 if __name__ == "__main__":

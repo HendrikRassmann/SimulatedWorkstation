@@ -11,24 +11,25 @@ import numpy as np
 
 
 def show():
-	fixed = figure_5
+	fixed = figure_8
 	print("showing")
 	print(fixed)
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "seqR"
-	yAxis = "maximumLateness"
+	xAxis = "timespan"
+	yAxis = "makespan"
 	schedulers = [
 		"fifo",
 		"fifo_fit",
 		"fifo_backfill",
 		"spt",
-		#"spt_fit",
-		#"spt_backfill",
-		"lpt"
-		#"lpt_fit",
-		#"lpt_backfill"
+		"spt_fit",
+		"spt_backfill",
+		"lpt",
+		"lpt_fit",
+		"lpt_backfill",
+		"fifo_optimistic"
 	]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
@@ -174,9 +175,25 @@ figure_3 = {
 	"Params.errorRate" : 0,
 	#"Params.maxError" : 0
 }
+
+figure_4 = {
+	"Params.numberOfJobs" : 250,
+	#"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"Params.numberOfNodes" : [275 if (x+1)/22 < 0.75 else 825 for x in range (22)],
+	#"seqR" :  [ x/100 for x in range(50, 101, 8)],
+	"Params.largeR" : 0.3,
+	"Params.timespan" : 4000,
+	"Params.minSeq" : 2000,
+	"Params.maxSeq" : 100000,
+	"Params.minPar" : 20000,
+	"Params.maxPar" : 800000,
+	"Params.errorRate" : 0
+	#"maxError" : 0
+}
+
 figure_5 = {
 	"Params.numberOfJobs" : 500,
-	#"Params.numberOfNodes" : [100 for x in range (22)],
+	"Params.numberOfNodes" : [275 if (x+1)/100 < 0.75 else 825 for x in range (100)],
 	#"Params.seqR" :  [ x/100 for x in range(50,101, 4)],
 	"Params.largeR" : 0.3,
 	"Params.timespan" : 2000,
@@ -184,6 +201,46 @@ figure_5 = {
 	"Params.maxSeq" : 100000,
 	"Params.minPar" : 20000,
 	"Params.maxPar" : 800000,
-	"Params.errorRate" : 0,
+	"Params.errorRate" : 0
 	#"Params.maxError" : [0]
+}
+figure_6 = {
+	"Params.numberOfJobs" : 250,
+	#Params."numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"Params.numberOfNodes" : [275 if (x+1)/22 < 0.75 else 825 for x in range (22)],
+	"Params.seqR" :  0.7,
+	#"Params.largeR" : [x/100 for x in range(0, 101,2)],
+	"Params.timespan" : 3500,
+	"Params.minSeq" : 2000,
+	"Params.maxSeq" : 100000,
+	"Params.minPar" : 20000,
+	"Params.maxPar" : 800000,
+	"Params.errorRate" : 0
+	#"Params.maxError" : [0]
+}
+figure_7 = {
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : [275 if (x+1)/22 < 0.75 else 825 for x in range (22)],
+	"Params.seqR" :  0.7,
+	"Params.largeR" : 0.3,
+	#"Params.timespan" : [x for x in range (0,10000+1, 100)],
+	"Params.minSeq" : 2000,
+	"Params.maxSeq" : 100000,
+	"Params.minPar" : 20000,
+	"Params.maxPar" : 800000,
+	"Params.errorRate" : 0
+	#"Params.maxError" : [0]
+}
+figure_8 = {
+	"Params.numberOfJobs" : 250,
+	"Params.numberOfNodes" : [275 if (x+1)/22 < 0.75 else 825 for x in range (22)],
+	"Params.seqR" :  0.7,
+	"Params.largeR" : 0.3,
+	"Params.timespan" : 4000,
+	"Params.minSeq" : 2000,
+	"Params.maxSeq" : 100000,
+	"Params.minPar" : 20000,
+	"Params.maxPar" : 800000,
+	"Params.errorRate" : 1,
+	#"Params.maxError" : [ [x/100 for x in range(0,501,20) ] ]
 }

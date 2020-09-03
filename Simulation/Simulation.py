@@ -66,14 +66,16 @@ class System:
 
 
     def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
-        fPick: Optional[Job] = f(self,q)
+
+        fPick: Optional[Job] = f(q)
         if fPick is None:
             return None #q empty
-        if self.nodesAvl >= fPick.degreeOP:
-            return fPick
+        if len(self.nodesAvl) >= fPick.degreeOP:#job can be started
+            #print(len(self.nodesAvl)) #immer 10 ?
+            return fPick#start it
         else:
             nodesNeeded: int = fPick.degreeOP
-            nodesFreeNow: int = len(nodesAvl)
+            nodesFreeNow: int = len(self.nodesAvl)
             runningByCompletionTime = sorted(self.running, key =lambda j: j.completionT)
             time2runF: int = None
             for r in runningByCompletionTime:
@@ -81,16 +83,23 @@ class System:
                     nodesFreeNow += r.degreeOP
                     time2runF = r.completionT
                 else:
-                    break #bug potential: what if multiple nodes get free at same time => more surplus than calculated! => OR
+                    break
 
-        #the second or claus makes it optimistic
-        return f(filter(q, lambda j:j.processingT <= (time2runF - self.time) or j.degreeOP <= (nodesFreeNow - nodesNeeded)))
+
+            self.nodesAvl.sort(key=lambda n: n.speed, reverse=True)
+            gap :int = time2runF - self.time
+            extraNodes :int = nodesFreeNow - fPick.degreeOP
+            filteredList :List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl) and (j.processingT / sum(map(lambda n:n.speed, self.nodesAvl[0:j.degreeOP])) <= gap or j.degreeOP <= extraNodes),q))
+            return f(filteredList)
 
     #note: self is just spam
     #self is not necessary
     #but fit, fill expect self (state)
     #=> when calling a scheduler, it might expect self
     #would be nice, if you could check, wether or not function expects self, and only give if necessary
+    def fifo_optimistic (self,q: List[Job]) -> Optional[Job]:
+        return self.optimisticBackfill(self.fifo,q)
+
     def fifo(self,q: List[Job]) -> Optional[Job]:
         return min(q, key=lambda j: (j.queueingT, j.id)) if q else None
 
