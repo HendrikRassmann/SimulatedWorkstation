@@ -75,7 +75,7 @@ def main():
 		Simulation.System.lpt,\
 		#Simulation.System.lpt_fit,\
 		#Simulation.System.lpt_backfill,\
-		Simulation.System.spt,\
+		Simulation.System.spt\
 		#Simulation.System.spt_fit,\
 		#Simulation.System.spt_backfill,\
 		]
@@ -86,7 +86,7 @@ def main():
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_4
+	experiment = figure_5
 
 	product = itertools.product( *experiment.values())
 	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
@@ -131,10 +131,10 @@ figure_1 = {
 }
 figure_2 = {
 	"numberOfJobs" : [250],
-	"numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
+	"numberOfNodes" : [[100,100,100,100,100,100,100,100,100,100]],
 	"seqR" : [1],
 	"largeR" : [0],
-	"timespan" : list(range(0,10000+1, 200)),
+	"timespan" : list(range(4000,8000+1, 200)),
 	"minSeq" : [1000],
 	"maxSeq" : [50000],
 	"minPar" : [0],
@@ -155,11 +155,16 @@ figure_3 = {
 	"errorRate" : [0],
 	"maxError" : [0]
 }
+minCompute = 38417
+totalCompute =  minCompute * 1.075
+coputeByNode = totalCompute/100
+fastBySlow = 1
 slowerR = 0.75
-figure_4 = {
+
+figure_5 = {
 	"numberOfJobs" : [500],
-	"numberOfNodes" : [[ 666 if x/21 < slowerR else 4700 for x in range (22)]],
-	"seqR" :  [ x/100 for x in range(50,101, 25)],
+	"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
+	"seqR" :  [ x/100 for x in range(50, 81, 2)],
 	"largeR" : [0.3],
 	"timespan" : [2000],
 	"minSeq" : [2000],

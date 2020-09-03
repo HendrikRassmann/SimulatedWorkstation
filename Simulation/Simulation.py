@@ -156,8 +156,16 @@ class System:
             #self.finished = self.finished + finishedJobs #extra jobs?
 
     def jobsEnterQ(self):
-        self.q +=  list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
-        self.futureJobs = list(filter(lambda j : j.queueingT > self.time, self.futureJobs))
+
+        while self.futureJobs:
+            if (self.futureJobs[0].queueingT > self.time):
+                break
+            else:
+                self.q.append(self.futureJobs.pop(0))
+
+        #assume ordered by qT, then = O(1) if nothing to schedule
+        #self.q +=  list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
+        #self.futureJobs = list(filter(lambda j : j.queueingT > self.time, self.futureJobs))
 
     def tick(self):
         nextQ: Optional[int] = None
@@ -186,6 +194,9 @@ class System:
         #self.time += 1
 
     def scheduleNextJob(self)->bool:
+        #without tasks and without nodes you cant run anything anyway
+        if not (self.q and self.nodesAvl):
+            return False
         nextJob: Optional[Job] = self.scheduler(self,self.q)
         if nextJob is None or nextJob.degreeOP > len(self.nodesAvl):
             return False
@@ -202,6 +213,7 @@ class System:
 
     def run(self)->List[Job]:
 
+        self.futureJobs.sort(key=lambda j:j.queueingT)
         assert (self.assertNodes == len(self.nodesAvl) + sum (map(lambda j: j.runningOn, self.running)))
         while self.q or self.futureJobs or self.running:
 

@@ -11,13 +11,14 @@ import numpy as np
 
 
 def show():
-
-	fixed = figure_4
+	fixed = figure_5
+	print("showing")
+	print(fixed)
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
 	xAxis = "seqR"
-	yAxis = "makespan"
+	yAxis = "maximumLateness"
 	schedulers = [
 		"fifo",
 		"fifo_fit",
@@ -25,7 +26,7 @@ def show():
 		"spt",
 		#"spt_fit",
 		#"spt_backfill",
-		"lpt",
+		"lpt"
 		#"lpt_fit",
 		#"lpt_backfill"
 	]
@@ -43,7 +44,7 @@ def show():
 				numberOfValues = len(values)
 				yAvg = sum(map (lambda x: x[yAxis], (item["Evals"][sf]) ) ) / numberOfValues
 				sfXY[sf].append((xVaried,yAvg))
-				print (xVaried,yAvg)
+				#print (xVaried,yAvg)
 
 	algoRep = {
 		"fifo":"^",
@@ -59,7 +60,7 @@ def show():
 
 	for sf in schedulers:
 		lsf = list(map(list, zip(*sorted(sfXY[sf], key=lambda x:x[0]))))
-		print (lsf)
+		#print (lsf)
 		xValues = lsf[0]
 		yValues = lsf[1]
 		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
@@ -151,7 +152,7 @@ figure_2 = {
 	"Params.numberOfJobs" : 250,
 	"Params.numberOfNodes" : [100,100,100,100,100,100,100,100,100,100],
 	"Params.seqR" : 1,
-	"Params.largeR" : 0,
+	#"Params.largeR" : 0
 	#"Params.timespan" : list(range(0,10000+1, 200)),
 	"Params.minSeq" : 1000,
 	"Params.maxSeq" : 50000,
@@ -173,7 +174,7 @@ figure_3 = {
 	"Params.errorRate" : 0,
 	#"Params.maxError" : 0
 }
-figure_4 = {
+figure_5 = {
 	"Params.numberOfJobs" : 500,
 	#"Params.numberOfNodes" : [100 for x in range (22)],
 	#"Params.seqR" :  [ x/100 for x in range(50,101, 4)],
