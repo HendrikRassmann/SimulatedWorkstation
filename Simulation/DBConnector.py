@@ -58,6 +58,7 @@ minSeq, maxSeq ,minPar, maxPar, errorRate, maxError, evals, sf):
 			sf.__name__ : evals
 			}
 		}
+
 		self.itemBuffer.append(dataPoint)
 		if len(self.itemBuffer) >= 100:
 			self.flush()

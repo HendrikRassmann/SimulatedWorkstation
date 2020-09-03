@@ -12,13 +12,11 @@ import numpy as np
 
 def show():
 	fixed = figure_8
-	print("showing")
-	print(fixed)
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "timespan"
-	yAxis = "makespan"
+	xAxis = "maxError"
+	yAxis = "maximumLateness"
 	schedulers = [
 		"fifo",
 		"fifo_fit",
@@ -241,6 +239,6 @@ figure_8 = {
 	"Params.maxSeq" : 100000,
 	"Params.minPar" : 20000,
 	"Params.maxPar" : 800000,
-	"Params.errorRate" : 1,
+	"Params.errorRate" : 1
 	#"Params.maxError" : [ [x/100 for x in range(0,501,20) ] ]
 }

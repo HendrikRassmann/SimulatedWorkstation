@@ -90,6 +90,7 @@ def main():
 	experiment = figure_8
 
 	product = itertools.product( *experiment.values())
+	#print(*experiment.values())
 	numberOfRuns = functools.reduce(operator.mul, map(len, list(experiment.values())), 1)
 	#product = itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar, errorRate, maxError)
 
@@ -228,7 +229,7 @@ figure_8 = {
 	"minPar" : [20000],
 	"maxPar" : [800000],
 	"errorRate" : [1],
-	"maxError" : [ [x/100 for x in range(0,501,20) ] ]
+	"maxError" : [x/100 for x in range(0,501,20)]
 }
 
 if __name__ == "__main__":
