@@ -8,15 +8,13 @@ import numpy as np
 
 
 
-
-
 def show():
-	fixed = figure_8
+	fixed = figure_4
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "maxError"
-	yAxis = "maximumLateness"
+	xAxis = "seqR"
+	yAxis = "avgFlowTime"
 	schedulers = [
 		"fifo",
 		"fifo_fit",

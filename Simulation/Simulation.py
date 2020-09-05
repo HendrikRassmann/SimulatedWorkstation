@@ -11,13 +11,13 @@ class Node:
         return "id: %d" % self.id
 
 class Job:
-    def __init__(self, id: int, queueingT : int, processingT: int, degreeOP: int, realProcessingT: int) -> None:
+    def __init__(self, id: int, queueingT : int, processingT: int, degreeOP: int, realProcessingT: int = None) -> None:
         self.id = id
         self.queueingT = queueingT
         self.processingT = processingT
         self.startRunning: Optional[int] = None
         self.completionT: Optional[int] = None
-        self.realProcessingT: Optional[int] = realProcessingT
+        self.realProcessingT: Optional[int] = processingT if realProcessingT is None else realProcessingT
         self.realCompletionT: Optional[int] = None
         self.degreeOP = degreeOP
         self.runningOn: List[Node] = []

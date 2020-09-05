@@ -87,7 +87,7 @@ def main():
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_8
+	experiment = figure_4
 
 	product = itertools.product( *experiment.values())
 	#print(*experiment.values())
