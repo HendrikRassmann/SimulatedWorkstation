@@ -6,6 +6,8 @@ from typing import cast, List, Union, Optional, Callable, Tuple, Text, TypeVar, 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from more_itertools import intersperse
+
 
 
 def show():
@@ -104,15 +106,21 @@ def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
 def run2String(jobs: List[Simulation.Job])->str:
 
 	#assumption: complete Run
-	#assumption: starts at 0
+	#assumption: starts at 0 #whoops
 	#assumption: 0 <= id < 10
+	#assumption: ids unique
+	firstQ: int = min(jobs,key=(lambda j:j.queueingT)).queueingT
 	lastCompletion: int = max(jobs,key=(lambda j:j.realCompletionT)).realCompletionT
 
 	#legende:
 	#id,qtime,paral
-	legend: str = "".join(list(map(lambda j: "id: %d, queueingT: %d, processingTime: %d, realProcessingT: %d, degreeOfParallelism: %d\n" % (j.id, j.queueingT,j.processingT,j.realProcessingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
+	
+	legend: string =  "queueintT, processingT, realProcessingT, degreeOfParallelism\n" + "".join(list(map(lambda j: "id: %d, qT: %d, pT: %d, rPT: %d, doP: %d\n" % (j.id, j.queueingT,j.processingT,j.realProcessingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
+	
 	#nodes: #QTimes später
-	#start,end,id
+	#make a dict of all the nodes running works
+	#add a reduced form of all the jobs to that id
+	#------------------------------start,end,id
 	nodesInRun: Dict[int,List[Tuple[int,int,int]]] = {}
 	for j in jobs:
 		for n in j.runningOn:
@@ -123,13 +131,15 @@ def run2String(jobs: List[Simulation.Job])->str:
 
 	for l in nodesInRun:
 		nodesInRun[l].sort(key=lambda x:x[0]) #sorted by start
+	#store the strings for each node here:
 	nodeStrings:Dict[int,str] = {}
 	for l in nodesInRun:
-		nodeStrings[l]=['-']*lastCompletion#how does last completion become float??
-		for j in nodesInRun[l]:
+		nodeStrings[l]=['-']*(lastCompletion)#how does last completion become float??
+		
+		for j in nodesInRun[l]:	
 			nodeStrings[l][j[0]:j[1]] = [str(j[2])]*(j[1]-j[0])
-		nodeStrings[l] = ["[",str(l),"]",":"] + nodeStrings[l] + ['\n']
-
+		nodeStrings[l] = ["[",str(l),"]",":"] + list(intersperse("|",nodeStrings[l], n=3 )) + ['\n']
+		
 	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
 
 figure_1 = {

@@ -134,6 +134,7 @@ class System:
 
     def __init__(self,jobs: List[Job], nodesAvl: List[int], scheduler:\
     Callable[ [List[Job], List[Node], List[Job],int ], Optional[Tuple[Job, List[Node]]]  ] ) -> None:
+    	
 
 
         #online, finished list inside System or reference?
@@ -143,8 +144,9 @@ class System:
         self.assertNumberOfJobs = len(jobs)
         self.time: int = 0
         self.nodesAvl: List[Node] = [] #("free nodes")
-        for i in range(len(nodesAvl)):
-            self.nodesAvl.append(Node(i,nodesAvl[i])) #all nodes speed 1
+        
+        for i in range(len(sorted(nodesAvl, reverse=True))):
+            self.nodesAvl.append(Node(i,sorted(nodesAvl, reverse=True)[i]) )
         #scheduling function
         self.scheduler = scheduler
         #Job q
@@ -152,7 +154,7 @@ class System:
         self.q :List[Job] = []
         self.running :List[Job] = []
         self.finished :List[Job] = []
-
+	
 
     def finishJobs(self):
         #newly finished Jobs:
@@ -167,10 +169,11 @@ class System:
     def jobsEnterQ(self):
 
         while self.futureJobs:
-            if (self.futureJobs[0].queueingT > self.time):
-                break
+            if (self.futureJobs[0].queueingT <= self.time):
+            	self.q.append(self.futureJobs.pop(0))
             else:
-                self.q.append(self.futureJobs.pop(0))
+            	break
+                
 
         #assume ordered by qT, then = O(1) if nothing to schedule
         #self.q +=  list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
@@ -211,18 +214,18 @@ class System:
             return False
         else:
             self.q.remove(nextJob)
-            self.nodesAvl.sort(key=lambda n:n.speed,reverse = True)
+            self.nodesAvl.sort(key=lambda n:(n.speed, -n.id ),reverse = True)
             nextJob.startRunning = self.time
             nextJob.runningOn = self.nodesAvl[:nextJob.degreeOP]
             self.nodesAvl = self.nodesAvl[nextJob.degreeOP:]
-            nextJob.completionT = self.time + round(nextJob.processingT / sum(map(lambda j:j.speed, nextJob.runningOn))) #nodespeed
-            nextJob.realCompletionT = self.time + round(nextJob.realProcessingT / sum(map(lambda j:j.speed, nextJob.runningOn)))
+            nextJob.completionT = self.time + math.ceil(nextJob.processingT / sum(map(lambda j:j.speed, nextJob.runningOn))) #nodespeed
+            nextJob.realCompletionT = self.time + math.ceil(nextJob.realProcessingT / sum(map(lambda j:j.speed, nextJob.runningOn)))
             self.running.append(nextJob)
             return True
 
     def run(self)->List[Job]:
 
-        self.futureJobs.sort(key=lambda j:j.queueingT)
+        self.futureJobs.sort(key=lambda j:(j.queueingT,j.id))
         assert (self.assertNodes == len(self.nodesAvl) + sum (map(lambda j: j.runningOn, self.running)))
         while self.q or self.futureJobs or self.running:
 
