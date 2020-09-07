@@ -34,6 +34,10 @@ class System:
 ############
 #Schedulers#
 ############
+    
+    def firstID(self, q:[List[Job]]  ) -> Optional[Job]:
+    	return min(q, key=lambda j:j.id)#äquivalent to fifo if all offline    	
+    
     def fit(self, f: Callable[[List[Job]],Optional[Job]], q:[List[Job]]  ) -> Optional[Job]:
         filteredList: List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl),q))
         return f(filteredList)
