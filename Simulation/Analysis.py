@@ -7,27 +7,32 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from more_itertools import intersperse
+import itertools
 
-
+startAt0 = False
+min_data_points = 10
 
 def show():
-	fixed = figure_4
+	fixed = figure_6
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "seqR"
-	yAxis = "avgFlowTime"
+	xAxis = "largeR"
+	yAxis = "makespan"
 	schedulers = [
-		"fifo",
+		#"fifo",
 		"fifo_fit",
 		"fifo_backfill",
-		"spt",
-		"spt_fit",
-		"spt_backfill",
-		"lpt",
-		"lpt_fit",
+		#"spt",
+		#"spt_fit",
+		#"spt_backfill",
+		#"lpt",
+		#"lpt_fit",
 		"lpt_backfill",
-		"fifo_optimistic"
+		#"fifo_optimistic",
+		#"lpt_backfill_fifo",
+		"lpt_optimistic_fifo"
+
 	]
 	for sf in schedulers:
 		sfXY[sf] = [] #pair of x,ys
@@ -41,8 +46,9 @@ def show():
 			values = item["Evals"].get(sf)
 			if values is not None:
 				numberOfValues = len(values)
-				yAvg = sum(map (lambda x: x[yAxis], (item["Evals"][sf]) ) ) / numberOfValues
-				sfXY[sf].append((xVaried,yAvg))
+				if (numberOfValues >= min_data_points):
+					yAvg = sum(map (lambda x: x[yAxis], (item["Evals"][sf]) ) ) / numberOfValues
+					sfXY[sf].append((xVaried,yAvg))
 				#print (xVaried,yAvg)
 
 	algoRep = {
@@ -54,7 +60,10 @@ def show():
 		"spt_backfill":"4",
 		"lpt":"*",
 		"lpt_fit":"x",
-		"lpt_backfill":"X"
+		"lpt_backfill":"X",
+		"lpt_backfill_fifo" : "o",
+		"lpt_optimistic_fifo" : "o"
+
 	}
 
 	for sf in schedulers:
@@ -65,7 +74,8 @@ def show():
 		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
 		plt.xlabel(xAxis)
 		plt.ylabel(yAxis)
-	plt.ylim(ymin=0)
+	if startAt0:
+		plt.ylim(ymin=0)
 	plt.legend()
 	plt.show()
 
@@ -103,6 +113,10 @@ def standardAnalysis(jobs: List[Simulation.Job])->Dict[str,Union[float,int]]:
 	}
 	return resultDict
 
+def complexityOfRun(jobs: List[Simulation.Job]) -> int:
+	nodes = len(set(list(itertools.chain.from_iterable(list( map(lambda j:j.runningOn,jobs))))))
+	return len(jobs) + len(list(filter(lambda j: j.queueingT != 0, jobs) )) + nodes
+
 def run2String(jobs: List[Simulation.Job])->str:
 
 	#assumption: complete Run
@@ -114,9 +128,9 @@ def run2String(jobs: List[Simulation.Job])->str:
 
 	#legende:
 	#id,qtime,paral
-	
+
 	legend: string =  "queueintT, processingT, realProcessingT, degreeOfParallelism\n" + "".join(list(map(lambda j: "id: %d, qT: %d, pT: %d, rPT: %d, doP: %d\n" % (j.id, j.queueingT,j.processingT,j.realProcessingT, j.degreeOP ), list(sorted(jobs,key=lambda j: j.id)) )))
-	
+
 	#nodes: #QTimes später
 	#make a dict of all the nodes running works
 	#add a reduced form of all the jobs to that id
@@ -135,12 +149,13 @@ def run2String(jobs: List[Simulation.Job])->str:
 	nodeStrings:Dict[int,str] = {}
 	for l in nodesInRun:
 		nodeStrings[l]=['-']*(lastCompletion)#how does last completion become float??
-		
-		for j in nodesInRun[l]:	
+
+		for j in nodesInRun[l]:
 			nodeStrings[l][j[0]:j[1]] = [str(j[2])]*(j[1]-j[0])
 		nodeStrings[l] = ["[",str(l),"]",":"] + list(intersperse("|",nodeStrings[l], n=3 )) + ['\n']
-		
-	return legend + "".join(list(map(lambda x:"".join(x), list(nodeStrings.values()))))
+
+
+	return legend + "".join(list(map(lambda x:"".join(x), list(sorted(nodeStrings.values())))))
 
 figure_1 = {
 	"Params.numberOfJobs" : 250,

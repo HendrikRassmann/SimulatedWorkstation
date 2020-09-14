@@ -34,22 +34,30 @@ class System:
 ############
 #Schedulers#
 ############
-    
+
     def firstID(self, q:[List[Job]]  ) -> Optional[Job]:
-    	return min(q, key=lambda j:j.id)#äquivalent to fifo if all offline    	
-    
+    	return min(q, key=lambda j:j.id)#äquivalent to fifo if all offline
+
     def fit(self, f: Callable[[List[Job]],Optional[Job]], q:[List[Job]]  ) -> Optional[Job]:
         filteredList: List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl),q))
         return f(filteredList)
         #use (wrapped_partial (f,))(q)
+    def fit2(self, f: Callable[[List[Job]],Optional[Job]], f2: Callable[[List[Job]],Optional[Job]], q:[List[Job]]  ) -> Optional[Job]:
+        fPick: Optional[Job] = f(q)
+        if fPick is None:
+            return None #q empty
+        if len(self.nodesAvl) >= fPick.degreeOP:#job can be started
+            return fPick#start it
+        else:
+            filteredList: List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl),q))
+            return f2(filteredList)
 
-    def backfilling (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
+    def backfilling2 (self, f: Callable[[List[Job]],Optional[Job] ], f2: Callable[[List[Job]],Optional[Job] ], q: List[Job])  -> Optional[Job]:
 
         fPick: Optional[Job] = f(q)
         if fPick is None:
             return None #q empty
         if len(self.nodesAvl) >= fPick.degreeOP:#job can be started
-            #print(len(self.nodesAvl)) #immer 10 ?
             return fPick#start it
         else:
             nodesNeeded: int = fPick.degreeOP
@@ -66,10 +74,15 @@ class System:
             self.nodesAvl.sort(key=lambda n: n.speed, reverse=True)
             gap :int = time2runF - self.time
             filteredList :List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl) and (j.processingT / sum(map(lambda n:n.speed, self.nodesAvl[0:j.degreeOP])) <= gap),q))
-            return f(filteredList)
+            return f2(filteredList)
+
+    def backfilling(self, f,q):
+        return self.backfilling2(f,f,q)
+    def optimisticBackfill (self,f,q):
+        return self.optimisticBackfill2(f,f,q)
 
 
-    def optimisticBackfill (self, f: Callable[[List[Job]],Optional[Job] ],q: List[Job])  -> Optional[Job]:
+    def optimisticBackfill2 (self, f: Callable[[List[Job]],Optional[Job] ], f2: Callable[[List[Job]],Optional[Job] ], q: List[Job])  -> Optional[Job]:
 
         fPick: Optional[Job] = f(q)
         if fPick is None:
@@ -94,13 +107,18 @@ class System:
             gap :int = time2runF - self.time
             extraNodes :int = nodesFreeNow - fPick.degreeOP
             filteredList :List[Job] = list(filter(lambda j: j.degreeOP <= len(self.nodesAvl) and (j.processingT / sum(map(lambda n:n.speed, self.nodesAvl[0:j.degreeOP])) <= gap or j.degreeOP <= extraNodes),q))
-            return f(filteredList)
-
+            return f2(filteredList)
     #note: self is just spam
     #self is not necessary
     #but fit, fill expect self (state)
     #=> when calling a scheduler, it might expect self
     #would be nice, if you could check, wether or not function expects self, and only give if necessary
+    def lpt_backfill_fifo(self,q: List[Job]) -> Optional[Job]:
+        return self.backfilling2(self.lpt, self.fifo,q)
+
+    def lpt_optimistic_fifo(self,q: List[Job]) -> Optional[Job]:
+        return self.optimisticBackfill2(self.lpt, self.fifo,q)
+
     def fifo_optimistic (self,q: List[Job]) -> Optional[Job]:
         return self.optimisticBackfill(self.fifo,q)
 
@@ -138,7 +156,7 @@ class System:
 
     def __init__(self,jobs: List[Job], nodesAvl: List[int], scheduler:\
     Callable[ [List[Job], List[Node], List[Job],int ], Optional[Tuple[Job, List[Node]]]  ] ) -> None:
-    	
+
 
 
         #online, finished list inside System or reference?
@@ -148,17 +166,17 @@ class System:
         self.assertNumberOfJobs = len(jobs)
         self.time: int = 0
         self.nodesAvl: List[Node] = [] #("free nodes")
-        
+
         for i in range(len(sorted(nodesAvl, reverse=True))):
             self.nodesAvl.append(Node(i,sorted(nodesAvl, reverse=True)[i]) )
         #scheduling function
         self.scheduler = scheduler
         #Job q
-        self.futureJobs = jobs
+        self.futureJobs = jobs[:]
         self.q :List[Job] = []
         self.running :List[Job] = []
         self.finished :List[Job] = []
-	
+
 
     def finishJobs(self):
         #newly finished Jobs:
@@ -177,7 +195,7 @@ class System:
             	self.q.append(self.futureJobs.pop(0))
             else:
             	break
-                
+
 
         #assume ordered by qT, then = O(1) if nothing to schedule
         #self.q +=  list(filter(lambda j : j.queueingT <= self.time, self.futureJobs))
@@ -190,7 +208,7 @@ class System:
             if nextQ is None:
                 nextQ = j.queueingT
             else:
-                nextQ = min(nextQ, j.queueingT)
+                nextQ = min(nextQ, j.queueingT)#flaky min?
 
         for j in self.running:
             if nextQ is None:

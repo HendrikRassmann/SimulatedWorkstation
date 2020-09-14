@@ -69,25 +69,27 @@ def main():
 
 
 	schedulers = [\
-		Simulation.System.fifo,\
+		#Simulation.System.fifo,\
 		Simulation.System.fifo_fit,\
 		Simulation.System.fifo_backfill,\
-		Simulation.System.lpt,\
-		Simulation.System.lpt_fit,\
+		#Simulation.System.lpt,\
+		#Simulation.System.lpt_fit,\
 		Simulation.System.lpt_backfill,\
-		Simulation.System.spt,\
-		Simulation.System.spt_fit,\
-		Simulation.System.spt_backfill,\
-		Simulation.System.fifo_optimistic
+		#Simulation.System.spt,\
+		#Simulation.System.spt_fit,\
+		#Simulation.System.spt_backfill,\
+		#Simulation.System.fifo_optimistic,\
+		#Simulation.System.lpt_backfill_fifo,\
+		Simulation.System.lpt_optimistic_fifo
 		]
 
-	numberOfIterations = list(range(5))
+	numberOfIterations = list(range(100))
 
 	dbConnector = DBConnector.DBConnector()
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_4
+	experiment = figure_6
 
 	product = itertools.product( *experiment.values())
 	#print(*experiment.values())
@@ -196,7 +198,7 @@ figure_6 = {
 	#"numberOfNodes" : [[ (totalCompute/2)/(slowerR*100) if (x+1)/100 < slowerR else (totalCompute/2)/(100*(1-slowerR)) for x in range (100)]],
 	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
 	"seqR" :  [0.7],
-	"largeR" : [x/100 for x in range(0, 101,2)],
+	"largeR" : [x/100 for x in range(0, 101,4)],
 	"timespan" : [3500],
 	"minSeq" : [2000],
 	"maxSeq" : [100000],
@@ -210,7 +212,7 @@ figure_7 = {
 	"numberOfNodes" : [[275 if (x+1)/22 < 0.75 else 825 for x in range (22)]],
 	"seqR" :  [0.7],
 	"largeR" : [0.3],
-	"timespan" : [x for x in range (2000,8000+1, 100)],
+	"timespan" : [x for x in range (2000,5000+1, 100)],
 	"minSeq" : [2000],
 	"maxSeq" : [100000],
 	"minPar" : [20000],
