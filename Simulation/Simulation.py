@@ -113,6 +113,16 @@ class System:
     #but fit, fill expect self (state)
     #=> when calling a scheduler, it might expect self
     #would be nice, if you could check, wether or not function expects self, and only give if necessary
+
+    def fifo_optimistic_lpt(self,q: List[Job]) -> Optional[Job]:
+        return self.optimisticBackfill2(self.fifo, self.lpt,q)
+
+    def fifo_backfill_lpt(self,q: List[Job]) -> Optional[Job]:
+        return self.backfilling2(self.fifo, self.lpt,q)
+
+    def fifo_backfill_spt(self,q: List[Job]) -> Optional[Job]:
+        return self.backfilling2(self.fifo, self.spt,q)
+
     def lpt_backfill_fifo(self,q: List[Job]) -> Optional[Job]:
         return self.backfilling2(self.lpt, self.fifo,q)
 

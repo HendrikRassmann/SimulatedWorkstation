@@ -6,32 +6,36 @@ from typing import cast, List, Union, Optional, Callable, Tuple, Text, TypeVar, 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from more_itertools import intersperse
+from more_itertools import intersperse, pairwise
 import itertools
 
+
 startAt0 = False
-min_data_points = 10
+min_data_points = 1
 
 def show():
-	fixed = figure_6
+	fixed = figure_3
 
 	sfXY = {}
 	dbConnector = DBConnector.DBConnector()
-	xAxis = "largeR"
-	yAxis = "makespan"
+	xAxis = "seqR"
+	yAxis = "avgFlowTime"
 	schedulers = [
-		#"fifo",
+		"fifo",
 		"fifo_fit",
 		"fifo_backfill",
-		#"spt",
-		#"spt_fit",
-		#"spt_backfill",
-		#"lpt",
-		#"lpt_fit",
+		"spt",
+		"spt_fit",
+		"spt_backfill",
+		"lpt",
+		"lpt_fit",
 		"lpt_backfill",
-		#"fifo_optimistic",
+		"fifo_optimistic",
+		"fifo_backfill_lpt",
+		"fifo_optimistic_lpt",
 		#"lpt_backfill_fifo",
-		"lpt_optimistic_fifo"
+		#"lpt_optimistic_fifo"
+		"fifo_backfill_spt"
 
 	]
 	for sf in schedulers:
@@ -71,6 +75,7 @@ def show():
 		#print (lsf)
 		xValues = lsf[0]
 		yValues = lsf[1]
+		print("Area under curve " + str(sf) + " : " + str(integral(xValues,yValues)))
 		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
 		plt.xlabel(xAxis)
 		plt.ylabel(yAxis)
@@ -86,6 +91,16 @@ def show():
 #what the list has multiple runs with same config
 results get plottet
 '''
+
+def integral(xVals: List[Union[float,int]],yVals: List[float])->float:
+	#assume correlate, x is sorted low->hi
+	#assume at least 2 xvalues
+	#assume no two x values same
+	beginnIntegral, endIntegral = xVals[0], xVals[-1]
+	numberOfBars = len(xVals)-1
+	bars = zip(xVals,yVals)
+	area = sum(map(lambda pair: ( ((pair[0][1]+pair[1][1])/2) *abs(pair[0][0]-pair[1][0]) ),pairwise(bars) ) )
+	return area
 
 
 def makespan(jobs: List[Simulation.Job])->int:
@@ -156,6 +171,20 @@ def run2String(jobs: List[Simulation.Job])->str:
 
 
 	return legend + "".join(list(map(lambda x:"".join(x), list(sorted(nodeStrings.values())))))
+
+def idleTime(jobs: List[Simulation.Job])->Optional[float]:
+	if jobs is None:
+		return None
+	end: int = max(jobs, key=lambda j:j.realCompletionT).realCompletionT
+	nodes: int = len(set(list(itertools.chain.from_iterable(list( map(lambda j:j.runningOn,jobs))))))
+	potentialPT:int = end*nodes
+	totalT = potentialPT
+
+	for j in jobs:
+		potentialPT -= (j.realCompletionT-j.startRunning)*j.degreeOP
+
+	return potentialPT /  totalT
+
 
 figure_1 = {
 	"Params.numberOfJobs" : 250,

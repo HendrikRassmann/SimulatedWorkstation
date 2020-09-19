@@ -1,5 +1,3 @@
-
-
 '''
 python 3.6
 sudo Mongod : starts mongoDB
@@ -13,7 +11,7 @@ python3 -m pytest
 
 	2DAY:
 
-	(0)-find flakeness (min/max)
+
 
 	(O)-Testing!!!!!
 		#generator
@@ -25,7 +23,7 @@ python3 -m pytest
 		*tick random time (1..10)
 	(O)-find nice invariants to check
 	(O)-build state full testing in hypothesis (compare to vary input lists)
-
+	(X)-find flakeness (min/max) => Test time out
 	# Fuck Random (O)-fix Random. once a job is choosen, it should stay choosen until it is started (Prob.)
 	(X) refactor Schedulers to be nice (Agnostic to state (Nodes, Running, etc)) #but !this! sucks
 	(X) false times
@@ -70,17 +68,20 @@ def main():
 
 	schedulers = [\
 		#Simulation.System.fifo,\
-		Simulation.System.fifo_fit,\
-		Simulation.System.fifo_backfill,\
+		#Simulation.System.fifo_fit,\
+		#Simulation.System.fifo_backfill,\
 		#Simulation.System.lpt,\
 		#Simulation.System.lpt_fit,\
-		Simulation.System.lpt_backfill,\
+		#Simulation.System.lpt_backfill,\
 		#Simulation.System.spt,\
 		#Simulation.System.spt_fit,\
 		#Simulation.System.spt_backfill,\
 		#Simulation.System.fifo_optimistic,\
+		#Simulation.System.fifo_backfill_lpt
+		Simulation.System.fifo_optimistic_lpt,#,\
 		#Simulation.System.lpt_backfill_fifo,\
-		Simulation.System.lpt_optimistic_fifo
+		#Simulation.System.lpt_optimistic_fifo
+		Simulation.System.fifo_backfill_spt
 		]
 
 	numberOfIterations = list(range(100))
@@ -89,7 +90,7 @@ def main():
 	print ("DB connection open, start running")
 	doneRuns = 0
 
-	experiment = figure_6
+	experiment = figure_3
 
 	product = itertools.product( *experiment.values())
 	#print(*experiment.values())
@@ -104,6 +105,8 @@ def main():
 			for sf in schedulers:
 				sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
 				finishedJobs: List[Simulation.Job] = sys.run()
+				#print("unused PT:")
+				(Analysis.idleTime(finishedJobs))
 				dbConnector.add(*conf, Analysis.standardAnalysis(finishedJobs), sf)
 
 		runCounter+=1
