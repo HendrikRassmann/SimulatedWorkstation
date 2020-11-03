@@ -1,3 +1,7 @@
+'''
+run with python3 -m pytest
+'''
+
 def nice (tupJobsNodes):
 	#handles stuf thats easier this way:
 	#unique ids
@@ -81,9 +85,9 @@ def test_backfill_better_fifo_and_optimistic_makespan_lateness(listAndNodes):
 '''
 @settings(max_examples=100000, deadline=None)
 @given(generate_System_and_Jobs(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
-def test_compareXY12a2exas211aasda111111(listAndNodes):
+def test_compareX(listAndNodes):
 	#loser +winner
-	assert compareA2BonC(Simulation.System.spt_backfill, Simulation.System.spt, listAndNodes, Analysis.makespan, False)
+	assert compareA2BonC(Simulation.System.fifo_backfill, Simulation.System.fifo_optimistic, listAndNodes, Analysis.maximumLateness, unique=False)
 '''
 @settings(max_examples=100)
 @given(generate_System_and_Jobs_ID_Permutation(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
