@@ -76,6 +76,7 @@ def show():
 		xValues = lsf[0]
 		yValues = lsf[1]
 		print("Area under curve " + str(sf) + " : " + str(integral(xValues,yValues)))
+		
 		plt.plot(xValues,yValues,label= sf,marker=algoRep.get(sf, "."))
 		plt.xlabel(xAxis)
 		plt.ylabel(yAxis)

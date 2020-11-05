@@ -70,21 +70,34 @@ def main(experiment):
 
 
         print (byTarget)
-        '''dbCopy = {**bySchedulers}
-        for targetFunktion in ["makespan","avgFlowTime","maxiumumLateness"]:
+        #sortieren nach x
+        #dbCopy = {**bySchedulers}
+        fig, axs  = plt.subplots(3)
+        i = 0
+        for targetFunktion in ["makespan","avgFlowTime","maximumLateness"]:
                 #setup
                 xLabel = experiment["x-axis"][0]
                 yLabel = targetFunktion
-                for sf in experiment["schedulers"]:
-                        confs = dbCopy[sf]#confs : {(*conf):[{Analysis1},{Analysis} ]}
-                        #avg out
-                        #fetch and plot
+
+                for sf in byTarget[targetFunktion]:
                         xs = []
                         ys = []
-                        for conf in confs:
-                                xs.append()
-                                acc = sum(map(lambda x : x[targetFunktion], confs[conf]))
-                        confs'''
+                        pairs = sorted(byTarget[targetFunktion][sf],key=lambda x: x[0])
+                        grouped= itertools.groupby(pairs,lambda x:x[0])
+                        for key, group in grouped:
+                                vals = list(group)
+                                xs.append(key)
+                                ys.append(sum(map(lambda x: x[1],vals))/len(vals) )
+
+                        axs[i].plot(xs,ys,label=sf)
+                axs[i].set_ylabel(targetFunktion)
+                axs[i].set_ylim(ymin=0)
+                axs[i].legend(bbox_to_anchor=(1.0,1),loc = "upper left",fontsize ="xx-small")
+                i+=1
+        
+        plt.xlabel(experiment["x-axis"][0])
+        plt.show()
+                        
 
 if __name__ == "__main__":
         if len (sys.argv) == 0:
