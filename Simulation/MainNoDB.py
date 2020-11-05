@@ -69,7 +69,7 @@ def main(experiment):
                                         byTarget[target][sf].append((conf[xValueConverter[experiment["x-axis"][0]]],analysis[target]))
 
 
-        print (byTarget)
+        #print (byTarget)
         #sortieren nach x
         #dbCopy = {**bySchedulers}
         fig, axs  = plt.subplots(3)

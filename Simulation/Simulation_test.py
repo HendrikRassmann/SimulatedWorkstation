@@ -20,9 +20,12 @@ def nice (tupJobsNodes):
 
 from hypothesis import given, settings, Verbosity, note, assume, target, strategies as st
 from hypothesis.strategies import builds
+#import hypothesis
 import Simulation
 import Analysis
+import sys
 from Simulation import Job
+
 
 #keep
 #here important to work,
@@ -83,11 +86,12 @@ def compareA2BonC(a_scheduler, b_scheduler, listAndNodes, metric, unique = False
 def test_backfill_better_fifo_and_optimistic_makespan_lateness(listAndNodes):
 	assert compareA2BonC(Simulation.System.fifo_optimistic, Simulation.System.fifo_backfill, listAndNodes, Analysis.maximumLateness, True) or compareA2BonC(Simulation.System.fifo, Simulation.System.fifo_backfill, listAndNodes, Analysis.maximumLateness, True) or compareA2BonC(Simulation.System.fifo_optimistic, Simulation.System.fifo_backfill, listAndNodes, Analysis.makespan, True) or compareA2BonC(Simulation.System.fifo, Simulation.System.fifo_backfill, listAndNodes, Analysis.makespan, True)
 '''
-@settings(max_examples=100000, deadline=None)
+@settings(max_examples=100000, deadline=None,database=None)
 @given(generate_System_and_Jobs(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
-def test_compareX(listAndNodes):
+def test_compareX(f1,f2,listAndNodes):
+	
 	#loser +winner
-	assert compareA2BonC(Simulation.System.fifo_backfill, Simulation.System.fifo_optimistic, listAndNodes, Analysis.maximumLateness, unique=False)
+	assert compareA2BonC(f1, f2, listAndNodes, Analysis.maximumLateness, unique=False)
 '''
 @settings(max_examples=100)
 @given(generate_System_and_Jobs_ID_Permutation(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
@@ -108,3 +112,26 @@ def test_smallest_difference(listAndNodes):#tuple
 
 	assert (makespan_a == makespan_b)
 '''
+
+if __name__ == "__main__":
+	schedulers = {
+		"fifo" : Simulation.System.fifo,
+		"spt" : Simulation.System.spt,
+		"lpt" : Simulation.System.lpt,
+		"fifo_fit" : Simulation.System.fifo_fit,
+		"fifo_backfill" : Simulation.System.fifo_backfill,
+		"fifo_optimistic" :Simulation.System.fifo_optimistic,
+		"lpt_fit" : Simulation.System.lpt_fit,
+		"lpt_backfill" :Simulation.System.lpt_backfill,
+		"lpt_optimistic" : Simulation.System.lpt_optimistic,
+		"spt_fit" :Simulation.System.spt_fit,
+		"spt_backfill" :Simulation.System.spt_backfill,
+		"spt_optimistic" : Simulation.System.spt_optimistic,
+		"fifo_optimistic_lpt" : Simulation.System.fifo_optimistic_lpt,
+		"fifo_backfill_lpt" : Simulation.System.fifo_backfill_lpt,
+		"fifo_backfill_spt": Simulation.System.fifo_backfill_spt,
+		"lpt_backfill_fifo": Simulation.System.lpt_backfill_fifo,
+		"lpt_optimistic_fifo" : Simulation.System.lpt_optimistic_fifo	
+	}
+	
+	test_compareX(schedulers[sys.argv[1]],schedulers[sys.argv[2]])

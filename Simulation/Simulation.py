@@ -128,6 +128,12 @@ class System:
 
     def lpt_optimistic_fifo(self,q: List[Job]) -> Optional[Job]:
         return self.optimisticBackfill2(self.lpt, self.fifo,q)
+        
+    def lpt_optimistic(self,q: List[Job]) -> Optional[Job]:
+        return self.optimisticBackfill(self.lpt,q)
+
+    def spt_optimistic(self,q: List[Job]) -> Optional[Job]:
+        return self.optimisticBackfill(self.spt,q)
 
     def fifo_optimistic (self,q: List[Job]) -> Optional[Job]:
         return self.optimisticBackfill(self.fifo,q)
