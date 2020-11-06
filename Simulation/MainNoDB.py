@@ -23,7 +23,9 @@ import math
 import importlib.util
 
 #fakeDB
-import json
+import csv
+import os.path
+from pathlib import Path
 
 
 xValueConverter = {
@@ -37,14 +39,34 @@ xValueConverter = {
         "minPar":7,
         "maxPar":8
 }
+schedulerConverter = {
+		"fifo" : Simulation.System.fifo,
+		"spt" : Simulation.System.spt,
+		"lpt" : Simulation.System.lpt,
+		"fifo_fit" : Simulation.System.fifo_fit,
+		"fifo_backfill" : Simulation.System.fifo_backfill,
+		"fifo_optimistic" :Simulation.System.fifo_optimistic,
+		"lpt_fit" : Simulation.System.lpt_fit,
+		"lpt_backfill" :Simulation.System.lpt_backfill,
+		"lpt_optimistic" : Simulation.System.lpt_optimistic,
+		"spt_fit" :Simulation.System.spt_fit,
+		"spt_backfill" :Simulation.System.spt_backfill,
+		"spt_optimistic" : Simulation.System.spt_optimistic,
+		"fifo_optimistic_lpt" : Simulation.System.fifo_optimistic_lpt,
+		"fifo_backfill_lpt" : Simulation.System.fifo_backfill_lpt,
+		"fifo_backfill_spt": Simulation.System.fifo_backfill_spt,
+		"lpt_backfill_fifo": Simulation.System.lpt_backfill_fifo,
+		"lpt_optimistic_fifo" : Simulation.System.lpt_optimistic_fifo	
+	}
 #from collections import defaultdict
 
-def main(experiment):
+def main(experiment,experimentName,n=2):
+        
         print ("Started Runs")
         start: float = timeit.default_timer()
 
         finishedRuns = []
-        numberOfIterations = list(range(2))    
+        numberOfIterations = list(range(n))    
 
         byTarget = {
                 "makespan":{},
@@ -54,6 +76,13 @@ def main(experiment):
         for target in byTarget:
                 for sf in experiment["schedulers"]:
                         byTarget[target][sf]=[]
+
+        if Path(experimentName + ".csv").is_file():
+                with open(experimentName + ".csv", newline="") as csvfile:
+                        reader = csv.reader(csvfile, delimiter = ";")
+                        for row in reader:
+                                byTarget[row[0]][row[1]].append((float(row[2]), float(row[3])))
+                                #print(", ".join(row))
         
         product = itertools.product( *(list(experiment.values()))[:-2] )
         for conf in product:#itertools.product(numberOfJobs,numberOfNodes,seqR,largeR,timespan,minSeq,maxSeq,minPar,maxPar):
@@ -62,7 +91,7 @@ def main(experiment):
                 for i in numberOfIterations:
                         jobs: List[Simulation.Job] = Generator.generate(*conf)
                         for sf in experiment["schedulers"]:
-                                sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],sf)
+                                sys: Simulation.System = Simulation.System(jobs.copy(),conf[1],schedulerConverter[sf])
                                 finished: List[Simulation.Job] = sys.run()
                                 analysis = Analysis.standardAnalysis(finished)
                                 for target in byTarget:
@@ -72,6 +101,15 @@ def main(experiment):
         #print (byTarget)
         #sortieren nach x
         #dbCopy = {**bySchedulers}
+
+        #save to file:
+        with open(experimentName + ".csv", "w", newline="") as csvfile:
+                writer = csv.writer(csvfile, delimiter=";")
+                for target in byTarget:
+                        for sf in byTarget[target]:
+                                for valuePair in byTarget[target][sf]:
+                                        writer.writerow([target]+[sf]+list(valuePair))
+        
         fig, axs  = plt.subplots(3)
         i = 0
         for targetFunktion in ["makespan","avgFlowTime","maximumLateness"]:
@@ -104,14 +142,19 @@ if __name__ == "__main__":
                 print ("run MainNoDB.py experiment1.py")
                 sys.exit()
         if sys.argv[1].endswith(".py"):
+                iterations = 5
+                if len(sys.argv) > 2:
+                        iterations = abs(int(sys.argv[2]))
+                
                 file_path = sys.argv[1]
                 module_name = sys.argv[1][:-3]
                 spec = importlib.util.spec_from_file_location(module_name, file_path)
                 module = importlib.util.module_from_spec(spec)
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
-                main(module.experiment)
+                main(module.experiment,module_name,100)
                 #print (module.experiment)
+                print(iterations)
                 sys.exit()
 
         else:
