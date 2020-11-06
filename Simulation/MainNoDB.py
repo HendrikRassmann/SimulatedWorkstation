@@ -60,7 +60,7 @@ schedulerConverter = {
 	}
 #from collections import defaultdict
 
-def main(experiment,experimentName,n=2):
+def main(experiment,experimentName,n=1):
         
         print ("Started Runs")
         start: float = timeit.default_timer()
@@ -152,7 +152,7 @@ if __name__ == "__main__":
                 module = importlib.util.module_from_spec(spec)
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
-                main(module.experiment,module_name,100)
+                main(module.experiment,module_name,iterations)
                 #print (module.experiment)
                 print(iterations)
                 sys.exit()

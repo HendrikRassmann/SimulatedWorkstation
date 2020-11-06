@@ -88,10 +88,10 @@ def test_backfill_better_fifo_and_optimistic_makespan_lateness(listAndNodes):
 '''
 @settings(max_examples=100000, deadline=None,database=None)
 @given(generate_System_and_Jobs(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
-def test_compareX(f1,f2,listAndNodes):
+def test_compareX(f1,f2,target,listAndNodes):
 	
 	#loser +winner
-	assert compareA2BonC(f1, f2, listAndNodes, Analysis.maximumLateness, unique=False)
+	assert compareA2BonC(f1, f2, listAndNodes, target, unique=False)
 '''
 @settings(max_examples=100)
 @given(generate_System_and_Jobs_ID_Permutation(maxNodes=10, maxNumberOfJobs=10, maxRuntime=10, maxQT=10))
@@ -133,5 +133,10 @@ if __name__ == "__main__":
 		"lpt_backfill_fifo": Simulation.System.lpt_backfill_fifo,
 		"lpt_optimistic_fifo" : Simulation.System.lpt_optimistic_fifo	
 	}
+	targets = {
+		"makespan" : Analysis.makespan,
+		"avgFlowTime" : Analysis.avgFlowTime,
+		"maximumLateness" : Analysis.maximumLateness	
+	}
 	
-	test_compareX(schedulers[sys.argv[1]],schedulers[sys.argv[2]])
+	test_compareX(schedulers[sys.argv[1]],schedulers[sys.argv[2]],targets[sys.argv[3]])
