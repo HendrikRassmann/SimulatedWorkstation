@@ -37,7 +37,9 @@ xValueConverter = {
         "minSeq":5,
         "maxSeq":6,
         "minPar":7,
-        "maxPar":8
+        "maxPar":8,
+        "errorRate":9,
+        "maxError":10
 }
 schedulerConverter = {
 		"fifo" : Simulation.System.fifo,
